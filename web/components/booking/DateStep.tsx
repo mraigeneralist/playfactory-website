@@ -22,7 +22,7 @@ export default function DateStep({ selected, onSelect, onNext, onBack }: Props) 
       <h2 className="font-heading text-2xl font-bold text-ink mb-2">Pick a date</h2>
       <p className="text-ink-soft mb-6">Book up to {BOOKING_HORIZON_DAYS} days ahead.</p>
 
-      <div className="rounded-xl border border-border bg-white p-4 flex justify-center">
+      <div className="flex justify-center">
         <DayPicker
           mode="single"
           selected={selected ?? undefined}
@@ -32,19 +32,19 @@ export default function DateStep({ selected, onSelect, onNext, onBack }: Props) 
         />
       </div>
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-8 flex gap-3">
         <button
           onClick={onBack}
-          className="rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-ink-soft hover:bg-surface"
+          className="rounded-xl border border-border bg-white px-5 py-3.5 text-sm font-semibold text-ink-soft hover:border-primary/40 hover:text-primary-dark transition-colors"
         >
-          ← Back
+          Back
         </button>
         <button
           disabled={!selected}
           onClick={onNext}
-          className="btn-primary rounded-full px-7 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="btn-primary flex-1 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Continue →
+          Continue
         </button>
       </div>
     </div>

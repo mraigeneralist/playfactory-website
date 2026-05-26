@@ -20,7 +20,8 @@ export default function DetailsStep({
 }: Props) {
   const phoneValid = /^[6-9]\d{9}$/.test(phone);
   const nameValid = name.trim().length >= 2;
-  const canSubmit = phoneValid && nameValid && !loading;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const canSubmit = phoneValid && nameValid && emailValid && !loading;
 
   return (
     <div>
@@ -66,7 +67,7 @@ export default function DetailsStep({
 
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-            Email (optional)
+            Email
           </label>
           <input
             type="email"
@@ -75,6 +76,10 @@ export default function DetailsStep({
             placeholder="you@email.com"
             className="w-full rounded-xl border border-border bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
+          {email.length > 0 && !emailValid && (
+            <p className="mt-1.5 text-xs text-destructive">Enter a valid email address.</p>
+          )}
+          <p className="mt-1.5 text-xs text-muted">We'll send your booking confirmation here.</p>
         </div>
 
         {error && (
@@ -84,17 +89,17 @@ export default function DetailsStep({
         )}
       </div>
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-8 flex gap-3">
         <button
           onClick={onBack}
-          className="rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-ink-soft hover:bg-surface"
+          className="rounded-xl border border-border bg-white px-5 py-3.5 text-sm font-semibold text-ink-soft hover:border-primary/40 hover:text-primary-dark transition-colors"
         >
-          ← Back
+          Back
         </button>
         <button
           disabled={!canSubmit}
           onClick={onSubmit}
-          className="btn-primary rounded-full px-7 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="btn-primary flex-1 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {loading ? "Booking…" : "Confirm Booking"}
         </button>

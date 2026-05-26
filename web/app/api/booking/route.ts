@@ -16,7 +16,7 @@ const BookingSchema = z.object({
   priceINR: z.number().int().nonnegative(),
   name: z.string().min(2).max(80),
   phone: z.string().regex(/^[6-9]\d{9}$/, "Invalid Indian mobile number"),
-  email: z.string().email().optional(),
+  email: z.string().email("Please enter a valid email address"),
 });
 
 export async function POST(req: Request) {

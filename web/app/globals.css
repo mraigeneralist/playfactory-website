@@ -148,3 +148,20 @@ h1, h2, h3, h4 { font-family: var(--font-poppins), system-ui, sans-serif; letter
   color: var(--primary-dark);
   font-weight: 700;
 }
+.rdp-root .rdp-button_previous,
+.rdp-root .rdp-button_next {
+  color: var(--muted);
+}
+.rdp-root .rdp-button_previous svg,
+.rdp-root .rdp-button_next svg {
+  color: var(--muted);
+  fill: var(--muted);
+}
+.rdp-root .rdp-button_previous:hover svg,
+.rdp-root .rdp-button_next:hover svg {
+  color: var(--primary);
+  fill: var(--primary);
+}
+.rdp-root .rdp-chevron { fill: var(--muted); }
+.rdp-root .rdp-button_previous:hover .rdp-chevron,
+.rdp-root .rdp-button_next:hover .rdp-chevron { fill: var(--primary); }
