@@ -165,39 +165,29 @@ function UserIcon({ className }: { className?: string }) {
   );
 }
 
-// Always-visible profile chip. Defaults to the signed-out icon during the
-// brief moment auth state is loading, then swaps to the user's initial if
-// they're signed in.
+// Always-visible profile chip. Same silhouette icon either way; only the
+// destination changes (account if signed in, login if not). Subtle green
+// border when signed in so you can still tell at a glance.
 function ProfileButton({
   signedIn,
-  initial,
-  compact,
 }: {
   signedIn: boolean | null;
-  initial: string;
+  initial?: string;
   compact?: boolean;
 }) {
-  const size = compact ? "h-10 w-10" : "h-10 w-10";
-
-  if (signedIn) {
-    return (
-      <Link
-        href="/account"
-        aria-label="My account"
-        title="My account"
-        className={`inline-flex ${size} items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-bold shadow-soft hover:shadow-rich transition-shadow`}
-      >
-        {initial || "?"}
-      </Link>
-    );
-  }
-  // signedIn === false OR null (loading) → show the silhouette and link to login.
+  const href = signedIn ? "/account" : "/login";
+  const label = signedIn ? "My account" : "Sign in";
   return (
     <Link
-      href="/login"
-      aria-label="Sign in"
-      title="Sign in"
-      className={`inline-flex ${size} items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:border-primary hover:text-primary transition-colors`}
+      href={href}
+      aria-label={label}
+      title={label}
+      prefetch
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-full border bg-white transition-colors ${
+        signedIn
+          ? "border-primary/40 text-primary-dark hover:bg-primary-soft"
+          : "border-border text-ink-soft hover:border-primary hover:text-primary"
+      }`}
     >
       <UserIcon className="h-5 w-5" />
     </Link>
