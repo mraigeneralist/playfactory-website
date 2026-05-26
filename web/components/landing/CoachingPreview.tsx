@@ -2,6 +2,8 @@ import Link from "next/link";
 import { COACHING, formatINR } from "@/lib/constants";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
+const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+
 const CATEGORY_ICONS: Record<string, string> = {
   Badminton: "🏸",
   "Table Tennis": "🏓",
@@ -49,10 +51,21 @@ export default function CoachingPreview() {
                     {sample.cadence}
                   </p>
                   <Link
-                    href="/coaching"
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark"
+                    href={`/coaching#${slugify(cat)}`}
+                    className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark"
                   >
-                    See programs →
+                    Know more
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className="transition-transform group-hover:translate-x-0.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
+                    </svg>
                   </Link>
                 </div>
               </ScrollReveal>

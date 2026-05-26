@@ -11,6 +11,8 @@ export const metadata = {
 
 const CATEGORY_ORDER = ["Badminton", "Table Tennis", "Cricket", "Dance", "Drawing", "Silambam"] as const;
 
+const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+
 const enquire = (program: string) =>
   `https://wa.me/${PUBLIC_WHATSAPP}?text=${encodeURIComponent(
     `Hi ${BUSINESS.name}, I'd like to enquire about: ${program}`
@@ -39,7 +41,7 @@ export default function CoachingPage() {
           const items = COACHING.filter((c) => c.category === cat);
           if (items.length === 0) return null;
           return (
-            <section key={cat} className="py-12 md:py-16">
+            <section key={cat} id={slugify(cat)} className="py-12 md:py-16 scroll-mt-24 md:scroll-mt-28">
               <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <ScrollReveal>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink mb-8">
