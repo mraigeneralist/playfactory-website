@@ -1,0 +1,190 @@
+{
+  "version": "7.0",
+  "data_api_version": "3.0",
+  "routing_model": {
+    "SPORT": ["DATE"],
+    "DATE": ["SLOT"],
+    "SLOT": ["DETAILS"],
+    "DETAILS": ["SUCCESS", "ERROR"],
+    "SUCCESS": [],
+    "ERROR": ["SPORT"]
+  },
+  "screens": [
+    {
+      "id": "SPORT",
+      "title": "Pick a sport",
+      "data": {
+        "sports": {
+          "type": "array",
+          "items": { "type": "object" },
+          "__example__": [{ "id": "badminton-court", "title": "Badminton Court", "price": 400 }]
+        }
+      },
+      "terminal": false,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "RadioButtonsGroup",
+            "name": "sport_id",
+            "label": "What are you playing?",
+            "data-source": "${data.sports}",
+            "required": true
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "name": "data_exchange",
+              "payload": { "sport_id": "${form.sport_id}" }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "DATE",
+      "title": "Pick a date",
+      "data": {
+        "sport_id": { "type": "string", "__example__": "badminton-court" },
+        "dates": {
+          "type": "array",
+          "items": { "type": "object" },
+          "__example__": [{ "id": "2026-05-27", "title": "Wed, 27 May" }]
+        }
+      },
+      "terminal": false,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "RadioButtonsGroup",
+            "name": "date_id",
+            "label": "When?",
+            "data-source": "${data.dates}",
+            "required": true
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "name": "data_exchange",
+              "payload": {
+                "sport_id": "${data.sport_id}",
+                "date_id": "${form.date_id}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "SLOT",
+      "title": "Pick a time",
+      "data": {
+        "sport_id": { "type": "string", "__example__": "badminton-court" },
+        "date_id": { "type": "string", "__example__": "2026-05-27" },
+        "slots": {
+          "type": "array",
+          "items": { "type": "object" },
+          "__example__": [{ "id": "07:00", "title": "07:00 (4 left)" }]
+        }
+      },
+      "terminal": false,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "RadioButtonsGroup",
+            "name": "slot_id",
+            "label": "Available slots",
+            "data-source": "${data.slots}",
+            "required": true
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "name": "data_exchange",
+              "payload": {
+                "sport_id": "${data.sport_id}",
+                "date_id": "${data.date_id}",
+                "slot_id": "${form.slot_id}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "DETAILS",
+      "title": "Your details",
+      "data": {
+        "sport_id": { "type": "string", "__example__": "badminton-court" },
+        "date_id": { "type": "string", "__example__": "2026-05-27" },
+        "slot_id": { "type": "string", "__example__": "07:00" }
+      },
+      "terminal": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextInput", "name": "name", "label": "Full name", "required": true },
+          { "type": "TextInput", "name": "phone", "label": "Phone (10 digits)", "input-type": "phone", "required": true },
+          {
+            "type": "Footer",
+            "label": "Confirm booking",
+            "on-click-action": {
+              "name": "data_exchange",
+              "payload": {
+                "sport_id": "${data.sport_id}",
+                "date_id": "${data.date_id}",
+                "slot_id": "${data.slot_id}",
+                "name": "${form.name}",
+                "phone": "${form.phone}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "SUCCESS",
+      "title": "Booked!",
+      "data": {
+        "booking_id": { "type": "string", "__example__": "PF20260527-070000-001" }
+      },
+      "terminal": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "You're booked!" },
+          { "type": "TextBody", "text": "Booking ID: ${data.booking_id}" },
+          { "type": "TextBody", "text": "Show up 5 minutes early. Pay at the desk." },
+          {
+            "type": "Footer",
+            "label": "Done",
+            "on-click-action": { "name": "complete", "payload": {} }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ERROR",
+      "title": "Something went wrong",
+      "data": { "message": { "type": "string", "__example__": "Slot just filled up" } },
+      "terminal": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Hmm." },
+          { "type": "TextBody", "text": "${data.message}" },
+          {
+            "type": "Footer",
+            "label": "Start over",
+            "on-click-action": { "name": "navigate", "next": { "type": "screen", "name": "SPORT" }, "payload": {} }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ffffff;
+  --surface: #f7fdf9;
+  --surface-2: #ecfdf3;
+  --ink: #0a1f14;
+  --ink-soft: #4b5d54;
+  --muted: #6b7c73;
+  --border: #e3ede7;
+  --border-mid: #cfe0d6;
+
+  --primary: #16a34a;
+  --primary-deep: #052e16;
+  --primary-dark: #15803d;
+  --primary-soft: #dcfce7;
+  --primary-bright: #22c55e;
+  --primary-glow: rgba(22, 163, 74, 0.18);
+
+  --accent: #fbbf24;
+  --destructive: #ef4444;
+  --success: #16a34a;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-h: 80px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-mid: var(--border-mid);
+  --color-primary: var(--primary);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-bright: var(--primary-bright);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --font-heading: var(--font-poppins);
+  --font-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+h1, h2, h3, h4 { font-family: var(--font-poppins), system-ui, sans-serif; letter-spacing: -0.02em; }
+
+/* Subtle dotted texture for hero/featured sections */
+.dot-tex {
+  background-image: radial-gradient(rgba(22, 163, 74, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Scroll reveal — port from RR */
+.rv {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s var(--ease-spring), transform 0.9s var(--ease-spring);
+}
+.rv.on { opacity: 1; transform: translateY(0); }
+.rv.d1 { transition-delay: 0.1s; }
+.rv.d2 { transition-delay: 0.2s; }
+.rv.d3 { transition-delay: 0.3s; }
+.rv.d4 { transition-delay: 0.4s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.au1 { opacity: 0; animation: fadeUp 0.9s var(--ease-spring) 0.05s forwards; }
+.au2 { opacity: 0; animation: fadeUp 0.9s var(--ease-spring) 0.20s forwards; }
+.au3 { opacity: 0; animation: fadeUp 0.9s var(--ease-spring) 0.35s forwards; }
+.au4 { opacity: 0; animation: fadeUp 0.9s var(--ease-spring) 0.50s forwards; }
+
+/* Rich card shadow */
+.shadow-soft {
+  box-shadow: 0 10px 30px -12px rgba(22, 163, 74, 0.18), 0 2px 6px -2px rgba(10, 31, 20, 0.06);
+}
+.shadow-rich {
+  box-shadow: 0 24px 60px -28px rgba(22, 163, 74, 0.35), 0 6px 14px -6px rgba(10, 31, 20, 0.08);
+}
+
+/* Hero gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-bright) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-spring);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px -10px var(--primary-glow);
+}
+
+@media (max-width: 900px) {
+  :root { --nav-h: 64px; }
+}
+
+/* react-day-picker — green theme */
+.rdp-root {
+  --rdp-accent-color: var(--primary);
+  --rdp-accent-background-color: var(--primary-soft);
+  --rdp-selected-border: none;
+  --rdp-today-color: var(--primary-dark);
+  --rdp-disabled-opacity: 0.35;
+  margin: 0 auto;
+}
+.rdp-root *:focus,
+.rdp-root *:focus-visible { outline: none !important; box-shadow: none !important; }
+.rdp-root .rdp-month_caption { color: var(--primary-dark); font-weight: 600; }
+.rdp-root .rdp-weekday { color: var(--muted); }
+.rdp-root .rdp-day_button { color: var(--ink); border-radius: 0.5rem; }
+.rdp-root .rdp-day_button:hover { background: var(--primary-soft); }
+.rdp-root .rdp-selected .rdp-day_button {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: var(--primary-dark);
+  font-weight: 700;
+}

@@ -1,0 +1,171 @@
+# UNDERSTAND.md — How the PlayFactory project works
+
+> Read this once end-to-end. After that, **SETUP.md** has the click-by-click instructions.
+
+## What you're getting
+
+A complete, deployable marketing + booking site for PlayFactory, plus a half-built WhatsApp bot. Three pieces:
+
+| Piece | Lives in | Status | Purpose |
+|---|---|---|---|
+| **Website** | `web/` | Done — deploy & go | Customer-facing marketing pages + online slot booking |
+| **Sheet backend** | `apps-script/Code.gs` | Done — paste into Google Sheet | The "database" the website talks to |
+| **WhatsApp bot** | `whatsapp-bot/` | Scaffolded, not wired | Customers book by chatting; auto reminder messages |
+
+The website works the moment you connect it to the Sheet. The WhatsApp bot is ready to activate when you've gone through Meta Business onboarding (covered in SETUP step 6).
+
+---
+
+## Why these tech choices
+
+| Choice | Reason |
+|---|---|
+| **Next.js 16 on Vercel** | Easy deploys, fast pages, great DX. Vercel's free tier covers PlayFactory's traffic for years. |
+| **Tailwind CSS** | No CSS sprawl. Every spacing/color decision visible at the markup level. |
+| **Google Sheet (via Apps Script)** | PlayFactory's staff can read & edit bookings without learning a database. Zero hosting cost, no GCP project needed. We can swap for a real DB later without touching the UI. |
+| **WhatsApp Flows** | One-tap booking inside WhatsApp — no app install, no website handoff. The same Sheet logs both website AND WhatsApp bookings. |
+
+---
+
+## Data flow — booking a slot from the website
+
+```
+[Customer browser]
+       │ visits /book
+       ▼
+[Next.js page]  ── multi-step form, state in sessionStorage
+       │ GET /api/booking/slots?sport=…&date=…
+       ▼
+[Next.js API route]  ── /web/app/api/booking/slots/route.ts
+       │ (server-side fetch)
+       ▼
+[Apps Script Web App]  ── doGet(action=slots)
+       │ reads Config + Bookings + Blocked tabs
+       ▼
+[Google Sheet]
+       │ returns [{time, remaining, available}, …]
+       ▼
+[Customer browser]  ── shows green/grey slot grid
+
+(then…)
+       │ POST /api/booking  (with name+phone+choice)
+       ▼
+[Next.js API route]  ── zod-validates, re-checks price
+       │
+       ▼
+[Apps Script Web App]  ── doPost(action=book)
+       │ LockService → re-checks capacity → appends row
+       ▼
+[Google Sheet]  ── new row in "Bookings"
+       │
+       ▼
+[Customer browser]  ── booking ID + confirmation screen
+```
+
+---
+
+## Folder-by-folder
+
+### `web/` — the Next.js site
+- **`app/layout.tsx`** — wraps every page; loads Poppins + Inter fonts.
+- **`app/page.tsx`** — the home page; composes 6 sections from `components/landing/`.
+- **`app/book/page.tsx`** — the 5-step booking machine. Persists state to `sessionStorage` so customers can refresh / hit Back without losing progress.
+- **`app/coaching/page.tsx`**, **`memberships/page.tsx`**, **`contact/page.tsx`**, **`gallery/page.tsx`** — secondary pages, all rendered from arrays in `lib/constants.ts`.
+- **`app/api/booking/route.ts`** — POST endpoint: validates payload, forwards to Sheets.
+- **`app/api/booking/slots/route.ts`** — GET endpoint: returns availability.
+- **`components/landing/`** — Hero, SportsSection, CoachingPreview, MembershipsPreview, WhySection, CTASection, Navbar, Footer.
+- **`components/booking/`** — the 5 step components + StepIndicator.
+- **`components/ui/`** — `ScrollReveal` (fade-up on scroll) and `WhatsAppFloat` (sticky chat button).
+- **`lib/constants.ts`** — ★ **the file you'll edit most**. Sports list, prices, court counts, coaching programs, memberships, business contact. Every `TODO:` placeholder lives here.
+- **`lib/sheets.ts`** — server-only Apps Script client. Reads `SHEETS_WEBHOOK_URL` and `SHEETS_WEBHOOK_SECRET` from env.
+- **`lib/slots.ts`** — pure helpers: generate hourly slots, format times.
+- **`lib/types.ts`** — shared TypeScript types.
+
+### `apps-script/Code.gs` — the backend
+- One file. Paste into the Apps Script editor attached to your Google Sheet.
+- Exposes two routes: `doGet` (read slots) and `doPost` (write a booking).
+- Uses `LockService` to prevent two bookings racing for the same last court.
+- Validates a shared secret on every POST.
+
+### `whatsapp-bot/` — the WhatsApp scaffold
+- **`main.py`** — FastAPI app. Health check, webhook verify, message webhook, Flow endpoint, reminder cron.
+- **`bot/config.py`** — env-driven settings.
+- **`bot/sheets.py`** — Python twin of `web/lib/sheets.ts` — talks to the same Apps Script Web App.
+- **`bot/whatsapp.py`** — Cloud API wrapper (send text, open a Flow).
+- **`bot/flow_endpoint.py`** — handles Meta's encrypted Flow data exchange. Decrypts → routes to the right screen → re-encrypts.
+- **`bot/reminders.py`** — every 5 minutes, scans today's bookings, sends 1h/30m/10m reminders.
+- **`flows/booking_flow.json`** — the Flow JSON Meta uploads into your business account.
+
+---
+
+## The Google Sheet — three tabs
+
+### `Bookings` (append-only log)
+| Column | Notes |
+|---|---|
+| `booking_id` | Generated by Apps Script: `PF20260527-070000-001` |
+| `created_at` | Timestamp |
+| `sport` | The id (e.g. `badminton-court`) |
+| `sport_name` | Human label |
+| `date` | YYYY-MM-DD |
+| `slot_time` | `07:00` |
+| `duration_min`, `price`, `name`, `phone`, `email` | self-explanatory |
+| `status` | `confirmed` / `cancelled` / `no_show` |
+| `source` | `website` / `whatsapp` |
+
+To cancel a booking: set `status = cancelled`. That row no longer counts toward capacity.
+
+### `Config` (lookup table)
+One row per sport. Defines opening hours, slot length, parallel court count, and price. **Must stay in sync with `SPORTS` in `web/lib/constants.ts`.**
+
+### `Blocked` (manual closures)
+Add a row to block a specific date+sport+slot (use `*` in the sport column to block all sports for that time). Useful for tournaments, maintenance, holidays.
+
+---
+
+## What happens when…
+
+**…a customer books a slot at 7pm but two friends try at the same instant?**
+The Apps Script holds a script-wide `LockService` lock through capacity check + write. Only one wins; the others get "this slot just got fully booked".
+
+**…the Apps Script Web App is down?**
+The slots endpoint quietly falls back to "all open" so the site doesn't break. The booking POST fails loudly with an error the customer sees.
+
+**…the owner wants to block tomorrow morning?**
+Open the Sheet → `Blocked` tab → add `2026-05-28 | * | 06:00 | Maintenance` rows. Done — booking page reflects instantly (no deploy).
+
+**…you want to change a price?**
+Edit `web/lib/constants.ts` → push → Vercel auto-deploys. **Also** update the matching row in the Sheet's `Config` tab so the server-side capacity check uses the new price.
+
+---
+
+## Migration path: Sheets → Supabase (future)
+
+When PlayFactory outgrows the Sheet (think >100 bookings/day or wanting an admin dashboard), the migration is small:
+
+1. Create Supabase project; run a schema close to the Sheet tabs (`appointments`, `services`, `blocked_dates`).
+2. Replace `web/lib/sheets.ts` with a Supabase client — same `fetchSlots` / `createBooking` signatures.
+3. Add OTP verification at this point (the RoadRunners code in `WhatsAppBooking/` is a good reference).
+4. The WhatsApp bot's `bot/sheets.py` becomes `bot/db.py` pointing at the same Supabase tables.
+
+The UI / pages / styling / WhatsApp Flow JSON stay untouched.
+
+---
+
+## Security notes
+
+- The Apps Script shared secret (`SHEETS_WEBHOOK_SECRET`) is checked on every POST. Treat it like a password — rotate by changing the value in both `Code.gs` and `.env.local`, then redeploying both.
+- `web/next.config.ts` ships strict CSP, HSTS, and frame-ancestors=none headers — clickjacking is blocked by default.
+- We don't store payment info anywhere — payment is on arrival.
+- Phone numbers are stored in plain text in the Sheet. That's fine for this scale + audience; revisit if you ever scrape data out.
+
+---
+
+## When you'll want help
+
+- Photos / branding (we used emoji + gradient placeholders).
+- Wiring real Meta credentials for the WhatsApp bot.
+- Migrating to Supabase + adding an admin dashboard.
+- Add-ons: payments (Razorpay), GSTBilling, automated tournament brackets.
+
+Any of those — open a new conversation and reference this file.
