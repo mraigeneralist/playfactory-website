@@ -44,7 +44,7 @@ export default function HeroSection() {
               </Link>
             </div>
 
-            <div className="au4 mt-10 flex flex-wrap gap-6 text-sm text-ink-soft">
+            <div className="au4 mt-10 grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-6 text-sm text-ink-soft">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-primary-dark">✓</span>
                 Instant confirmation
