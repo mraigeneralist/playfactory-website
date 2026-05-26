@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
@@ -9,17 +10,25 @@ export const metadata = {
   description: `A look inside ${BUSINESS.name}.`,
 };
 
-// Each tile gets a placeholder gradient + emoji until real photos drop in.
-// TODO: Replace with real images in /public/gallery/* and swap to <Image />.
-const TILES = [
-  { icon: "🏸", label: "Badminton Courts", grad: "from-emerald-400 to-emerald-600" },
-  { icon: "🏏", label: "Cricket Turf", grad: "from-lime-400 to-emerald-700" },
-  { icon: "🏓", label: "TT Tables", grad: "from-teal-400 to-emerald-600" },
-  { icon: "💪", label: "Gym Floor", grad: "from-green-500 to-emerald-800" },
-  { icon: "🎯", label: "Coaching Sessions", grad: "from-emerald-500 to-teal-700" },
-  { icon: "🏆", label: "Tournaments", grad: "from-lime-500 to-green-700" },
-  { icon: "🎉", label: "Events", grad: "from-emerald-400 to-green-600" },
-  { icon: "👟", label: "Locker Room", grad: "from-teal-500 to-emerald-700" },
+interface Photo {
+  src: string;
+  label: string;
+  alt: string;
+}
+
+const PHOTOS: Photo[] = [
+  { src: "/gallery/badminton-court1.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
+  { src: "/gallery/badminton-court2.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
+  { src: "/gallery/badminton-court3.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
+  { src: "/gallery/tabletennis1.jpg", label: "Table Tennis", alt: "Table tennis at PlayFactory" },
+  { src: "/gallery/cricket1.jpg", label: "Cricket", alt: "Cricket turf at PlayFactory" },
+  { src: "/gallery/silambam1.jpg", label: "Silambam", alt: "Silambam class at PlayFactory" },
+  { src: "/gallery/drawing1.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
+  { src: "/gallery/drawing2.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
+  { src: "/gallery/drawing3.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
+  { src: "/gallery/music1.jpg", label: "Music", alt: "Music class at PlayFactory" },
+  { src: "/gallery/music2.jpg", label: "Music", alt: "Music class at PlayFactory" },
+  { src: "/gallery/music3.jpg", label: "Music", alt: "Music class at PlayFactory" },
 ];
 
 export default function GalleryPage() {
@@ -43,15 +52,23 @@ export default function GalleryPage() {
 
         <section className="py-12 md:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {TILES.map((t, i) => (
-                <ScrollReveal key={t.label} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
-                  <div
-                    className={`aspect-square rounded-2xl bg-gradient-to-br ${t.grad} flex flex-col items-center justify-center text-white shadow-soft hover:shadow-rich transition-all hover:-translate-y-1`}
-                  >
-                    <div className="text-6xl mb-3">{t.icon}</div>
-                    <div className="font-heading font-bold text-lg">{t.label}</div>
-                  </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {PHOTOS.map((p, i) => (
+                <ScrollReveal key={p.src} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+                  <figure className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-2 shadow-soft hover:shadow-rich transition-shadow">
+                    <Image
+                      src={p.src}
+                      alt={p.alt}
+                      fill
+                      sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+                      <figcaption className="font-heading text-sm font-bold uppercase tracking-wider text-white">
+                        {p.label}
+                      </figcaption>
+                    </div>
+                  </figure>
                 </ScrollReveal>
               ))}
             </div>
