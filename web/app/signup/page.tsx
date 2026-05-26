@@ -72,17 +72,23 @@ function SignupContent() {
     );
   }
 
+  const cameFromRedirect = !!params.get("next");
+
   return (
     <AuthShell
       title="Create your account"
       subtitle="Takes 30 seconds. You'll only need to do this once."
+      redirectedFrom={cameFromRedirect ? next : null}
       footer={
-        <>
-          Already have an account?{" "}
-          <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-primary-dark hover:text-primary">
+        <div className="space-y-3">
+          <div className="text-ink-soft">Already have an account?</div>
+          <Link
+            href={`/login?next=${encodeURIComponent(next)}`}
+            className="inline-flex w-full justify-center rounded-full border-2 border-primary bg-white px-5 py-3 text-sm font-semibold text-primary-dark hover:bg-primary-soft transition-colors"
+          >
             Sign in
           </Link>
-        </>
+        </div>
       }
     >
       <form onSubmit={submit} className="space-y-4">

@@ -31,17 +31,23 @@ function LoginContent() {
     router.refresh();
   }
 
+  const cameFromRedirect = !!params.get("next");
+
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Sign in to book your slot."
+      subtitle="Sign in to your PlayFactory account."
+      redirectedFrom={cameFromRedirect ? next : null}
       footer={
-        <>
-          New here?{" "}
-          <Link href={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-primary-dark hover:text-primary">
-            Create an account
+        <div className="space-y-3">
+          <div className="text-ink-soft">Don't have an account yet?</div>
+          <Link
+            href={`/signup?next=${encodeURIComponent(next)}`}
+            className="inline-flex w-full justify-center rounded-full border-2 border-primary bg-white px-5 py-3 text-sm font-semibold text-primary-dark hover:bg-primary-soft transition-colors"
+          >
+            Create new account
           </Link>
-        </>
+        </div>
       }
     >
       <form onSubmit={submit} className="space-y-4">
