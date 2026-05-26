@@ -139,6 +139,24 @@ Edit `web/lib/constants.ts` → push → Vercel auto-deploys. **Also** update th
 
 ---
 
+## Admin dashboard & notifications
+
+### Owner dashboard at `/admin`
+- Owner visits `/admin/login`, enters `ADMIN_PASSWORD`, gets a 7-day session cookie.
+- Dashboard shows: today's count + revenue, month-to-date, all-time, revenue-by-day chart, bookings-by-sport donut, next 5 upcoming slots, and a fully filterable table of every booking.
+- Auth lives in `web/lib/auth.ts` (signed-cookie HMAC, no third-party libs); the `web/proxy.ts` file enforces it on every `/admin/*` and `/api/admin/*` request.
+- Data is pulled live from the Sheet via a new `?action=admin_bookings` endpoint in `Code.gs`, protected by the same `SHEETS_WEBHOOK_SECRET`.
+
+### Notifications
+Every booking that gets saved triggers two emails (sent by Apps Script's built-in `MailApp`, from the Google account that owns the script):
+
+1. **Owner** — gets an HTML summary email at `OWNER_EMAIL` with all booking details + customer contact. Subject line includes sport + date + time so it's scan-friendly in the inbox.
+2. **Customer** — gets a clean confirmation email **only if they provided one**. Contains booking ID, time, address, phone.
+
+Both sends are wrapped in try/catch so a mail failure never breaks the booking itself. Google's free quota (1500 emails/day on personal Gmail) is more than enough.
+
+> SMS / WhatsApp customer notifications come later via the WhatsApp bot. The "Save to WhatsApp" button on the confirmation screen lets customers who skipped email forward themselves a summary.
+
 ## Migration path: Sheets → Supabase (future)
 
 When PlayFactory outgrows the Sheet (think >100 bookings/day or wanting an admin dashboard), the migration is small:

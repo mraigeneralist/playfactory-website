@@ -96,7 +96,13 @@ Open `web/.env.local` and fill:
 SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/AKfy.../exec
 SHEETS_WEBHOOK_SECRET=<the random string you put in Code.gs>
 NEXT_PUBLIC_WHATSAPP_NUMBER=919876543210
+
+# Admin dashboard at /admin
+ADMIN_PASSWORD=<pick a strong password the owner will use to sign in>
+SESSION_SECRET=<run: openssl rand -hex 32>
 ```
+
+> Also edit the top of `apps-script/Code.gs` and set `OWNER_EMAIL`, `BUSINESS_NAME`, `BUSINESS_ADDRESS`, and `BUSINESS_PHONE` so email notifications go to the right inbox with the right details.
 
 Then:
 ```bash
@@ -139,8 +145,13 @@ Then on Vercel:
    - `SHEETS_WEBHOOK_URL` = (your `/exec` URL)
    - `SHEETS_WEBHOOK_SECRET` = (same long random string)
    - `NEXT_PUBLIC_WHATSAPP_NUMBER` = `919876543210` (your real number)
+   - `ADMIN_PASSWORD` = the owner's admin password
+   - `SESSION_SECRET` = a long random string (different from `SHEETS_WEBHOOK_SECRET`)
 5. Click **Deploy**. Wait ~2 minutes.
 6. Test a booking on the live URL.
+7. Visit `https://your-vercel-url/admin/login`, sign in with `ADMIN_PASSWORD`, and confirm you see the dashboard with the test booking you just made.
+
+> Email notifications: the first time a booking lands, Apps Script will ask you (the script owner) to authorize the `MailApp` scope. Open the Apps Script editor → Run any function once → grant permission. After that, emails fire automatically. Email is sent from the Gmail account that owns the script and counts against your daily Gmail quota (1500/day for personal accounts — way more than PlayFactory will hit).
 
 **Custom domain**: Vercel → Project Settings → Domains → add `playfactory.in` (or whatever) and follow the DNS instructions.
 

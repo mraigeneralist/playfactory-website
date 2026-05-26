@@ -23,3 +23,19 @@ export interface BookingResult {
   bookingId?: string;
   error?: string;
 }
+
+export interface AdminBooking {
+  bookingId: string;
+  createdAt: string;
+  sport: string;
+  sportName: string;
+  date: string;
+  slotTime: string;
+  durationMin: number;
+  price: number;
+  name: string;
+  phone: string;
+  email: string;
+  status: "confirmed" | "cancelled" | "no_show" | "completed";
+  source: "website" | "whatsapp";
+}

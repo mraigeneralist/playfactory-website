@@ -28,6 +28,18 @@ whatsapp-bot/    Python FastAPI scaffold — not wired yet
 
 If the Sheets backend is unreachable, the slots endpoint **falls back to "all open"** so dev still works without env config — see the `try/catch` in `slots/route.ts`. The booking POST does not fall back; it errors clearly.
 
+## Admin dashboard
+
+- **Routes**: `/admin/login` (public), `/admin` (protected). Guarded by `web/proxy.ts` (Next.js 16 proxy convention — formerly middleware).
+- **Auth**: single shared password from `ADMIN_PASSWORD` env. Session is an HMAC-SHA256 signed cookie (`pf_admin`, 7-day TTL) using `SESSION_SECRET`. Implementation in `web/lib/auth.ts` — Web Crypto only, edge-runtime safe.
+- **Data**: `GET /api/admin/bookings` → `lib/sheets.ts#fetchAllBookings` → Apps Script `?action=admin_bookings&_secret=…`. The Apps Script auths reads with the same `SHEETS_WEBHOOK_SECRET` used for writes.
+- **UI**: stats (today/month/all-time), revenue-last-7-days bar chart, bookings-by-sport donut, upcoming-5 cards, full filterable table. All client-side filtering; loads all bookings in one shot (fine up to ~thousands).
+- **Don't** add admin write actions (cancel, reschedule) yet — the owner should still manage cancellations by editing `status` in the sheet directly. When this gets painful, that's the signal to migrate to Supabase.
+
+## Email notifications
+
+`apps-script/Code.gs#sendOwnerEmail` and `#sendCustomerEmail` are fired from inside `createBooking` after the row is saved. Both are wrapped in try/catch so a mail failure never breaks the booking response. Owner email goes to `OWNER_EMAIL` (constant at the top of `Code.gs`), customer email only fires if the booking included an email. The first booking after a fresh Apps Script deploy will trigger the Google auth scope prompt for `MailApp`.
+
 ## Apps Script backend
 
 `apps-script/Code.gs` is the entire backend. Three tabs:

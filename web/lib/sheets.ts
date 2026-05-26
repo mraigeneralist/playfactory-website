@@ -2,7 +2,7 @@
 // Never import from the browser — the SECRET lives in env and we relay
 // requests through Next API routes.
 
-import type { BookingPayload, BookingResult, Slot } from "./types";
+import type { BookingPayload, BookingResult, Slot, AdminBooking } from "./types";
 
 const WEBHOOK_URL = process.env.SHEETS_WEBHOOK_URL;
 const SECRET = process.env.SHEETS_WEBHOOK_SECRET;
@@ -48,4 +48,13 @@ export async function createBooking(
     return { success: false, error: json.error || "Booking failed" };
   }
   return { success: true, bookingId: json.bookingId || json.booking_id };
+}
+
+export async function fetchAllBookings(): Promise<AdminBooking[]> {
+  assertConfigured();
+  const url = `${WEBHOOK_URL}?action=admin_bookings&_secret=${encodeURIComponent(SECRET!)}`;
+  const res = await fetch(url, { method: "GET", cache: "no-store" });
+  if (!res.ok) throw new Error(`Admin fetch failed: ${res.status}`);
+  const json = await res.json();
+  return (json.bookings as AdminBooking[]) || [];
 }
