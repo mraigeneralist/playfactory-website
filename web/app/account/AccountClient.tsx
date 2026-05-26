@@ -111,20 +111,24 @@ function BookingsList({ bookings, emptyMsg }: { bookings: MyBooking[]; emptyMsg:
       {bookings.map((b) => (
         <div
           key={b.bookingId}
-          className="rounded-2xl border border-border bg-white p-5 shadow-soft flex flex-wrap items-center gap-4 justify-between"
+          className="rounded-2xl border border-border bg-white p-5 shadow-soft"
         >
-          <div>
-            <div className="font-mono text-[11px] text-primary-dark font-semibold">{b.bookingId}</div>
-            <div className="mt-1 font-heading text-lg font-bold text-ink">{b.sportName}</div>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-heading text-base sm:text-lg font-bold text-ink leading-snug">
+              {b.sportName}
+            </h3>
+            <span className={`shrink-0 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${STATUS_STYLES[b.status] || "bg-gray-100 text-gray-700"}`}>
+              {b.status.replace("_", " ")}
+            </span>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3">
             <div className="text-sm text-ink-soft">
               {format(parseISO(b.date), "EEE, d MMM yyyy")} · {formatSlotDisplay(b.slotTime)}
             </div>
+            <div className="font-bold text-primary-dark shrink-0">{formatINR(b.price)}</div>
           </div>
-          <div className="text-right">
-            <div className="font-bold text-primary-dark">{formatINR(b.price)}</div>
-            <span className={`mt-1 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLES[b.status] || "bg-gray-100 text-gray-700"}`}>
-              {b.status}
-            </span>
+          <div className="mt-3 pt-3 border-t border-border font-mono text-[11px] text-muted truncate">
+            {b.bookingId}
           </div>
         </div>
       ))}

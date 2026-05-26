@@ -57,6 +57,10 @@ export default function HeroSection() {
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-primary-dark">✓</span>
                 Open 6 AM – 11 PM
               </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-primary-dark">✓</span>
+                Free parking on-site
+              </div>
             </div>
           </div>
 

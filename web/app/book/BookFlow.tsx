@@ -176,13 +176,24 @@ export default function BookFlow({ initialProfile, preselectSportId }: Props) {
           {canBack ? (
             <button
               onClick={() => goToStep(step - 1)}
-              className="text-sm text-ink-soft hover:text-primary flex items-center gap-1"
+              aria-label="Back"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold text-ink-soft hover:border-primary/40 hover:bg-primary-soft hover:text-primary-dark transition-colors"
             >
-              ← Back
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform group-hover:-translate-x-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m0 0l6-6m-6 6l6 6" />
+              </svg>
+              <span className="hidden sm:inline">Back</span>
             </button>
           ) : (
-            <Link href="/" className="text-sm text-ink-soft hover:text-primary">
-              ← Home
+            <Link
+              href="/"
+              aria-label="Home"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold text-ink-soft hover:border-primary/40 hover:bg-primary-soft hover:text-primary-dark transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="transition-transform group-hover:-translate-y-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 11l9-8 9 8M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10" />
+              </svg>
+              <span className="hidden sm:inline">Home</span>
             </Link>
           )}
         </div>
