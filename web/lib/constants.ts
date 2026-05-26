@@ -19,7 +19,7 @@ export const BUSINESS = {
   hours: "6:00 AM — 11:00 PM, all days",
   mapEmbedSrc:
     "https://maps.google.com/maps?q=PlayFactory+24x7+Paruthipattu+Avadi+Chennai+600071&output=embed",
-  website: "https://www.playfactory24x7.com/",
+  instagram: "https://www.instagram.com/playfactory24x7/",
   youtube: "https://www.youtube.com/@playfactory24x7",
   facebook: "https://www.facebook.com/PLAYFTRY24x7/",
 };
