@@ -79,42 +79,26 @@ export default function Navbar() {
           >
             Book a Slot
           </Link>
-          {signedIn === false ? (
-            <Link
-              href="/login"
-              aria-label="Sign in"
-              title="Sign in"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:border-primary hover:text-primary transition-colors"
-            >
-              <UserIcon className="h-5 w-5" />
-            </Link>
-          ) : signedIn ? (
-            <Link
-              href="/account"
-              aria-label="My account"
-              title="My account"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-bold shadow-soft hover:shadow-rich transition-shadow"
-            >
-              {initial}
-            </Link>
-          ) : (
-            <span className="inline-block h-10 w-10" />
-          )}
+          <ProfileButton signedIn={signedIn} initial={initial} />
         </nav>
 
-        <button
-          aria-label="Toggle menu"
-          className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {open ? (
-              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-            ) : (
-              <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-            )}
-          </svg>
-        </button>
+        {/* Mobile: profile icon stays visible OUTSIDE the hamburger */}
+        <div className="md:hidden flex items-center gap-2">
+          <ProfileButton signedIn={signedIn} initial={initial} compact />
+          <button
+            aria-label="Toggle menu"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {open ? (
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -178,5 +162,44 @@ function UserIcon({ className }: { className?: string }) {
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
     </svg>
+  );
+}
+
+// Always-visible profile chip. Defaults to the signed-out icon during the
+// brief moment auth state is loading, then swaps to the user's initial if
+// they're signed in.
+function ProfileButton({
+  signedIn,
+  initial,
+  compact,
+}: {
+  signedIn: boolean | null;
+  initial: string;
+  compact?: boolean;
+}) {
+  const size = compact ? "h-10 w-10" : "h-10 w-10";
+
+  if (signedIn) {
+    return (
+      <Link
+        href="/account"
+        aria-label="My account"
+        title="My account"
+        className={`inline-flex ${size} items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-bold shadow-soft hover:shadow-rich transition-shadow`}
+      >
+        {initial || "?"}
+      </Link>
+    );
+  }
+  // signedIn === false OR null (loading) → show the silhouette and link to login.
+  return (
+    <Link
+      href="/login"
+      aria-label="Sign in"
+      title="Sign in"
+      className={`inline-flex ${size} items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:border-primary hover:text-primary transition-colors`}
+    >
+      <UserIcon className="h-5 w-5" />
+    </Link>
   );
 }
