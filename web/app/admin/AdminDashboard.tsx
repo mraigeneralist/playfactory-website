@@ -122,23 +122,41 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border sticky top-0 z-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
-          <Link href="/admin" className="inline-flex flex-col items-start gap-0.5">
-            <Logo className="text-xl sm:text-2xl" />
-            <span className="text-[10px] uppercase tracking-wider text-muted leading-tight">Owner dashboard</span>
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <Link href="/admin" className="inline-flex flex-col items-start gap-0.5 min-w-0">
+            <Logo className="text-lg sm:text-2xl" />
+            <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-muted leading-tight">
+              Owner dashboard
+            </span>
           </Link>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Icon-only on mobile, label on desktop */}
             <Link
               href="/"
-              className="rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-ink-soft hover:bg-surface"
+              aria-label="View site"
+              title="View site"
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:bg-surface px-2.5 sm:px-4 text-xs font-semibold"
             >
-              View site →
+              <svg className="h-4 w-4 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h6v6" />
+                <path d="M10 14L21 3" />
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              </svg>
+              <span className="hidden sm:inline">View site →</span>
             </Link>
             <button
               onClick={logout}
-              className="rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-ink-soft hover:bg-surface"
+              aria-label="Sign out"
+              title="Sign out"
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:bg-surface px-2.5 sm:px-4 text-xs font-semibold"
             >
-              Sign out
+              <svg className="h-4 w-4 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>
