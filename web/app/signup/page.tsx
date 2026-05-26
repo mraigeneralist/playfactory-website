@@ -44,14 +44,20 @@ function SignupContent() {
       return;
     }
 
-    // If email confirmation is OFF in Supabase, we already have a session.
-    // Profile row is created by the on_auth_user_created trigger — we update
-    // it with the name + phone the customer just typed.
+    // The trigger seeds the profile from raw_user_meta_data, but we also
+    // upsert here as a safety net (in case the trigger gets skipped or the
+    // update runs faster than the auth state is established).
     if (data.user) {
-      await supabase
-        .from("profiles")
-        .update({ name: name.trim(), phone })
-        .eq("id", data.user.id);
+      await supabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          email,
+          name: name.trim(),
+          phone,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
     }
 
     if (!data.session) {
