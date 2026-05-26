@@ -33,9 +33,19 @@ async function postOnce(body: string): Promise<{ ok: boolean; status: number; te
   // Apps Script /exec POSTs return a 302 to script.googleusercontent.com.
   // Node's undici follows redirects by default; explicit redirect:"follow"
   // documents intent.
+  //
+  // `Connection: close` is critical: Vercel's serverless containers reuse
+  // undici's connection pool across invocations. Apps Script closes the
+  // socket server-side after each response, but undici doesn't know — it
+  // tries to reuse the stale connection on the next booking and the POST
+  // dies before reaching Google. Forcing close-after-each ensures every
+  // attempt opens a fresh TCP connection.
   const res = await fetch(WEBHOOK_URL!, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Connection: "close",
+    },
     body,
     redirect: "follow",
     cache: "no-store",
