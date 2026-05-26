@@ -153,7 +153,8 @@ This is independent of the website. The website works fine without it. Activate 
 You'll need:
 - A **Meta Business** account (free, but requires phone verification): <https://business.facebook.com>
 - A **WhatsApp Business** phone number you can dedicate (separate from your personal WhatsApp).
-- An **always-on host** for the bot — Render.com or Railway.app are easiest (Vercel works too but needs Vercel Cron for reminders).
+- **Vercel** for the bot itself (second project on the same repo, Root Directory = `whatsapp-bot`).
+- **cron-job.org** (free) to hit `/cron/reminders` every 5 minutes — same setup you used for RoadRunners.
 
 Steps:
 
@@ -175,18 +176,25 @@ Steps:
    - Publish. Note the **Flow ID** → put in `FLOW_ID_BOOKING`.
    - Upload your `flow_public_key.pem` to the WhatsApp Business Account settings.
 
-4. **Deploy the bot** (on Render, for example):
-   ```bash
-   cd whatsapp-bot
-   cp .env.example .env  # fill in everything
-   ```
-   Push to a separate small repo or the same one with a Render config. Render auto-detects the `Procfile`.
+4. **Deploy the bot to Vercel** as a second project:
+   - <https://vercel.com/new> → import the same `playfactory-website` repo.
+   - **Root Directory** → `whatsapp-bot` (not `web`).
+   - Framework Preset: **Other**. Vercel auto-detects Python via `requirements.txt`.
+   - Add env vars from `.env.example` (everything you collected in steps 1–3).
+   - **Important**: set `RUN_IN_PROCESS_SCHEDULER=0`. Vercel serverless can't run a long-lived APScheduler — the external cron handles reminders instead.
+   - Deploy. You'll get a URL like `playfactory-bot.vercel.app`.
 
-5. **Webhook**: in Meta → WhatsApp config, set webhook to `https://your-render-url/webhook`, paste your `VERIFY_TOKEN`, subscribe to `messages`.
+5. **Webhook**: in Meta → WhatsApp config, set webhook to `https://playfactory-bot.vercel.app/webhook`, paste your `VERIFY_TOKEN`, subscribe to `messages`.
 
-6. **Test**: text "hi" to your business number. The bot should reply with the booking link. Tap the Flow button (you'll wire that next) to start a booking — it should write a row to the same Google Sheet as the website.
+6. **Set up reminders via cron-job.org** (same pattern as RoadRunners):
+   - <https://cron-job.org> → Create cronjob.
+   - URL: `https://playfactory-bot.vercel.app/cron/reminders`
+   - Schedule: every 5 minutes
+   - Method: **POST**
+   - Headers: add `Authorization: Bearer <your CRON_SECRET>`
+   - Save & enable. Check the execution log after a few minutes to confirm 200 responses.
 
-7. **Reminders**: either rely on the in-process scheduler (works on Render) or add a Vercel Cron / external cron that POSTs to `/cron/reminders` every 5 minutes with `Authorization: Bearer $CRON_SECRET`.
+7. **Test**: text "hi" to your business number. The bot should reply with the booking link. Tap the Flow button (you'll wire that into the welcome reply) to start a booking — it should write a row to the same Google Sheet as the website.
 
 > The reminders feature also expects an `action=bookings_today` endpoint in `Code.gs` that isn't built yet. Either add one (small change — filter `Bookings` rows where `date == today`) or migrate to Supabase first per `UNDERSTAND.md`.
 

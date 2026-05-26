@@ -27,6 +27,7 @@ Hit `http://localhost:8000/health` — should return `{"ok": true, ...}`.
 1. Generate an RSA keypair (Meta requires 2048-bit) → upload public key to Meta → put private key in `FLOW_PRIVATE_KEY`.
 2. Create a WhatsApp app + business in Meta. Grab `WHATSAPP_TOKEN`, `PHONE_NUMBER_ID`, `META_APP_SECRET`.
 3. In Meta Flow Builder, upload `flows/booking_flow.json` → get `FLOW_ID_BOOKING`.
-4. Deploy this app (Render / Fly / Railway recommended for the background scheduler; Vercel works too with Vercel Cron hitting `/cron/reminders`).
-5. Add the webhook URL `https://your-host/webhook` to Meta → subscribe to `messages`.
-6. Test by texting "hi" to the business number.
+4. Deploy this app to **Vercel** as a separate project pointing at this folder (Root Directory = `whatsapp-bot`). Set `RUN_IN_PROCESS_SCHEDULER=0` in env so the in-process APScheduler is disabled — Vercel serverless can't host it.
+5. Set up **cron-job.org** to POST to `/cron/reminders` every 5 minutes with header `Authorization: Bearer <CRON_SECRET>`. (Same pattern as the RoadRunners bot.)
+6. Add the webhook URL `https://your-bot.vercel.app/webhook` to Meta → subscribe to `messages`.
+7. Test by texting "hi" to the business number.
