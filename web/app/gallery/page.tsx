@@ -14,6 +14,11 @@ interface Group {
   title: string;
   blurb: string;
   photos: { src: string; alt: string }[];
+  /** "contain" preserves the whole image (letterboxed) — use when faces or
+   * trophies sit near the edges and object-cover would crop them. */
+  fit?: "cover" | "contain";
+  /** Taller aspect for portrait-heavy groups so contain has less letterboxing. */
+  aspect?: string;
 }
 
 const GROUPS: Group[] = [
@@ -55,6 +60,8 @@ const GROUPS: Group[] = [
   {
     title: "Achievements",
     blurb: "Medals, trophies, and the players who've earned them.",
+    fit: "contain",
+    aspect: "aspect-[3/4]",
     photos: [
       { src: "/gallery/achievements1.jpg", alt: "PlayFactory achievement" },
       { src: "/gallery/achievements2.jpg", alt: "PlayFactory achievement" },
@@ -101,13 +108,15 @@ export default function GalleryPage() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {g.photos.map((p, i) => (
                   <ScrollReveal key={p.src} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
-                    <figure className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-2 shadow-soft hover:shadow-rich transition-shadow">
+                    <figure
+                      className={`group relative ${g.aspect ?? "aspect-[4/3]"} overflow-hidden rounded-2xl bg-surface-2 shadow-soft hover:shadow-rich transition-shadow`}
+                    >
                       <Image
                         src={p.src}
                         alt={p.alt}
                         fill
                         sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`${g.fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-500 group-hover:scale-105`}
                       />
                     </figure>
                   </ScrollReveal>
