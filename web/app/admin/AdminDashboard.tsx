@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format, subDays, parseISO, isValid } from "date-fns";
-import { BUSINESS, formatINR } from "@/lib/constants";
+import { formatINR } from "@/lib/constants";
+import Logo from "@/components/Logo";
 import type { AdminBooking } from "@/lib/types";
 import StatCard from "@/components/admin/StatCard";
 import BookingsTable from "@/components/admin/BookingsTable";
@@ -122,12 +123,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-            <div>
-              <div className="font-heading font-bold text-primary-deep leading-tight">{BUSINESS.name}</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted leading-tight">Owner dashboard</div>
-            </div>
+          <Link href="/admin" className="inline-flex flex-col items-start gap-0.5">
+            <Logo className="text-lg sm:text-xl" />
+            <span className="text-[10px] uppercase tracking-wider text-muted leading-tight">Owner dashboard</span>
           </Link>
           <div className="flex items-center gap-2">
             <Link

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BUSINESS } from "@/lib/constants";
+import Logo from "@/components/Logo";
 
 interface Props {
   title: string;
@@ -30,9 +30,8 @@ export default function AuthShell({ title, subtitle, children, footer, redirecte
     <div className="min-h-screen flex flex-col bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-            <span className="font-heading text-xl font-bold text-primary-deep">{BUSINESS.name}</span>
+          <Link href="/" className="inline-flex">
+            <Logo className="text-xl sm:text-2xl" />
           </Link>
         </div>
       </div>

@@ -2,16 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BUSINESS, formatINR } from "@/lib/constants";
-
-const QUICK_PICKS = [
-  { id: "badminton-court", label: "Badminton", icon: "🏸", priceINR: 400 },
-  { id: "cricket-turf", label: "Cricket", icon: "🏏", priceINR: 1200 },
-  { id: "tt-court", label: "Table Tennis", icon: "🏓", priceINR: 250 },
-] as const;
+import { BUSINESS, SPORTS, formatINR } from "@/lib/constants";
 
 export default function HeroSection() {
-  const [picked, setPicked] = useState<string>("badminton-court");
+  const [picked, setPicked] = useState<string>(SPORTS[0].id);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-surface via-white to-surface-2">
@@ -36,7 +30,7 @@ export default function HeroSection() {
             </h1>
 
             <p className="au3 mt-5 max-w-xl text-base sm:text-lg text-ink-soft">
-              Book {BUSINESS.name} courts in seconds — pick a sport, pick a slot, show up &amp; play.
+              Book {BUSINESS.name}  courts and turfs in seconds — pick a sport, pick a slot, show up &amp; play.
             </p>
 
             <div className="au4 hidden md:flex flex-wrap gap-x-5 gap-y-2 mt-7 text-sm text-ink-soft">
@@ -63,33 +57,37 @@ export default function HeroSection() {
                 </div>
 
                 <div className="p-5 sm:p-6">
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    {QUICK_PICKS.map((s) => {
-                      const active = picked === s.id;
-                      return (
-                        <button
-                          key={s.id}
-                          onClick={() => setPicked(s.id)}
-                          className={`group flex flex-col items-center gap-1.5 rounded-2xl border p-3 sm:p-4 transition-all ${
-                            active
-                              ? "border-primary bg-primary-soft ring-2 ring-primary/20 -translate-y-0.5"
-                              : "border-border bg-white hover:border-primary/40 hover:-translate-y-0.5"
-                          }`}
-                        >
-                          <span className="text-3xl sm:text-4xl">{s.icon}</span>
-                          <span
-                            className={`text-xs sm:text-sm font-bold ${
-                              active ? "text-primary-dark" : "text-ink"
+                  <div className="relative -mx-5 sm:-mx-6">
+                    <div className="hero-pick-scroll flex gap-2.5 overflow-x-auto px-5 sm:px-6 pb-2 snap-x snap-mandatory">
+                      {SPORTS.map((s) => {
+                        const active = picked === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => setPicked(s.id)}
+                            className={`group flex w-[7.25rem] sm:w-32 shrink-0 snap-start flex-col items-center gap-1.5 rounded-2xl border p-3 sm:p-4 transition-all ${
+                              active
+                                ? "border-primary bg-primary-soft ring-2 ring-primary/20 -translate-y-0.5"
+                                : "border-border bg-white hover:border-primary/40 hover:-translate-y-0.5"
                             }`}
                           >
-                            {s.label}
-                          </span>
-                          <span className="text-[10px] sm:text-[11px] text-muted">
-                            from {formatINR(s.priceINR)}
-                          </span>
-                        </button>
-                      );
-                    })}
+                            <span className="text-3xl sm:text-4xl">{s.icon}</span>
+                            <span
+                              className={`text-xs sm:text-sm font-bold text-center leading-tight ${
+                                active ? "text-primary-dark" : "text-ink"
+                              }`}
+                            >
+                              {s.shortName}
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] text-muted">
+                              from {formatINR(s.priceINR)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* fade hint on right edge */}
+                    <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-white to-transparent" />
                   </div>
 
                   <Link

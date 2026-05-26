@@ -198,3 +198,10 @@ h1, h2, h3, h4 { font-family: var(--font-poppins), system-ui, sans-serif; letter
 .rdp-root .rdp-button_previous svg,
 .rdp-root .rdp-button_next svg,
 .rdp-root .rdp-chevron { color: currentColor; fill: currentColor; }
+
+/* Hero quick-book sport picker — hide scrollbar, keep scroll */
+.hero-pick-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hero-pick-scroll::-webkit-scrollbar { display: none; }

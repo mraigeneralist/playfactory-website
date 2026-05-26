@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { SPORTS, BUSINESS, type Sport, type SportId } from "@/lib/constants";
+import { SPORTS, type Sport, type SportId } from "@/lib/constants";
+import Logo from "@/components/Logo";
 import type { Slot } from "@/lib/types";
 import StepIndicator from "@/components/booking/StepIndicator";
 import SportStep from "@/components/booking/SportStep";
@@ -165,13 +166,8 @@ export default function BookFlow({ initialProfile, preselectSportId }: Props) {
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">
-              P
-            </span>
-            <span className="font-heading text-xl font-bold text-primary-deep">
-              {BUSINESS.name}
-            </span>
+          <Link href="/" className="inline-flex">
+            <Logo className="text-xl sm:text-2xl" />
           </Link>
           {canBack ? (
             <button

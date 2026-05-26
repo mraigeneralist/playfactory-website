@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { BUSINESS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/browser";
+import Logo from "@/components/Logo";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -70,8 +70,7 @@ export default function Navbar() {
     >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-          <span className="font-heading text-xl font-bold text-primary-deep">{BUSINESS.name}</span>
+          <Logo className="text-xl sm:text-2xl" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-7">

@@ -2,15 +2,14 @@
 // clicking the profile icon felt dead — the click was registered but Next.js
 // waited for the full server render before painting anything.
 
+import Logo from "@/components/Logo";
+
 export default function AccountLoading() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-            <div className="h-5 w-28 rounded bg-border/60 animate-pulse" />
-          </div>
+          <Logo className="text-xl sm:text-2xl" />
           <div className="h-9 w-28 rounded-full bg-border/60 animate-pulse" />
         </div>
       </div>

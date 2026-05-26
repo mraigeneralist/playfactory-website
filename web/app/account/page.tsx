@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fetchMyBookings } from "@/lib/db";
-import { BUSINESS } from "@/lib/constants";
 import AccountClient from "./AccountClient";
+import Logo from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +26,8 @@ export default async function AccountPage() {
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-            <span className="font-heading text-xl font-bold text-primary-deep">{BUSINESS.name}</span>
+          <Link href="/" className="inline-flex">
+            <Logo className="text-xl sm:text-2xl" />
           </Link>
           <Link
             href="/book"

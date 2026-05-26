@@ -1,15 +1,14 @@
 // Paints instantly while the server checks auth + fetches the profile.
 // Mirrors the real /book layout so the swap to actual content is seamless.
 
+import Logo from "@/components/Logo";
+
 export default function BookLoading() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
-            <div className="h-5 w-24 rounded bg-border/60 animate-pulse" />
-          </div>
+          <Logo className="text-xl sm:text-2xl" />
           <div className="h-4 w-14 rounded bg-border/60 animate-pulse" />
         </div>
       </div>

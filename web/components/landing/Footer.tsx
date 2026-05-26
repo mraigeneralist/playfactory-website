@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { BUSINESS, PUBLIC_WHATSAPP } from "@/lib/constants";
+import Logo from "@/components/Logo";
 
 export default function Footer() {
   return (
     <footer className="mt-20 bg-primary-deep text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white font-bold text-lg">
-              P
-            </span>
-            <span className="font-heading text-2xl font-bold">{BUSINESS.name}</span>
+          <div className="mb-4">
+            <Logo className="text-2xl sm:text-3xl" variant="light" />
           </div>
           <p className="text-white/70 max-w-md text-sm leading-relaxed">
             {BUSINESS.tagline}. Book courts and join coaching programs at
