@@ -41,6 +41,11 @@ export default function Footer() {
               </a>
             </li>
             <li>
+              <a className="hover:text-white" href={`tel:+${BUSINESS.phone2}`}>
+                {BUSINESS.phone2Display}
+              </a>
+            </li>
+            <li>
               <a
                 className="hover:text-white"
                 href={`https://wa.me/${PUBLIC_WHATSAPP}`}
@@ -57,6 +62,43 @@ export default function Footer() {
             </li>
             <li className="pt-2 text-white/60">{BUSINESS.hours}</li>
           </ul>
+
+          <div className="mt-5 flex items-center gap-3">
+            <a
+              href={BUSINESS.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-primary hover:text-white transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 12.07C22 6.5 17.52 2 12 2S2 6.5 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03H7.9v-2.9h2.54V9.84c0-2.51 1.49-3.9 3.78-3.9 1.1 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.75 8.43-4.91 8.43-9.93z" />
+              </svg>
+            </a>
+            <a
+              href={BUSINESS.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-primary hover:text-white transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.6 4 12 4 12 4s-7.6 0-9.4.4A3 3 0 0 0 .5 6.5C.1 8.3.1 12 .1 12s0 3.7.4 5.5a3 3 0 0 0 2.1 2.1c1.8.4 9.4.4 9.4.4s7.6 0 9.4-.4a3 3 0 0 0 2.1-2.1c.4-1.8.4-5.5.4-5.5s0-3.7-.4-5.5zM9.75 15.5v-7l6.5 3.5-6.5 3.5z" />
+              </svg>
+            </a>
+            <a
+              href={BUSINESS.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Website"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-primary hover:text-white transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
       <div className="border-t border-white/10">

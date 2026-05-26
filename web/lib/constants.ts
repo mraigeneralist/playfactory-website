@@ -5,21 +5,23 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const BUSINESS = {
-  name: "PlayFactory",
+  name: "PlayFactory 24×7",
   tagline: "Where Champions Play",
-  // TODO: replace with real address
-  address: "123 Sports Avenue, Chennai, Tamil Nadu 600001",
+  address: "No.1 PlayFactory 24×7 Campus, Paruthipattu, Avadi, Chennai - 600071",
   city: "Chennai",
-  // TODO: replace with real public phone (with country code, no +)
-  phone: "919876543210",
-  phoneDisplay: "+91 98765 43210",
-  email: "hello@playfactory.in",
+  // Primary phone (with country code, no +)
+  phone: "919445745993",
+  phoneDisplay: "+91 94457 45993",
+  // Secondary phone
+  phone2: "918148547046",
+  phone2Display: "+91 81485 47046",
+  email: "admin@playfactory24x7.com",
   hours: "6:00 AM — 11:00 PM, all days",
-  // TODO: replace with the real Google Maps share URL or embed src
   mapEmbedSrc:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31099.8!2d80.24!3d13.08!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0!2zMTPCsDA0JzQ4LjAiTiA4MMKwMTQnMjQuMCJF!5e0!3m2!1sen!2sin!4v1700000000000",
-  instagram: "https://instagram.com/playfactory",
-  google: "https://g.page/playfactory",
+    "https://maps.google.com/maps?q=PlayFactory+24x7+Paruthipattu+Avadi+Chennai+600071&output=embed",
+  website: "https://www.playfactory24x7.com/",
+  youtube: "https://www.youtube.com/@playfactory24x7",
+  facebook: "https://www.facebook.com/PLAYFTRY24x7/",
 };
 
 // ─── BOOKING — courts you can rent by the hour from the website ──────────────

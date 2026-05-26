@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BUSINESS } from "@/lib/constants";
 
 export default function HeroSection() {
   return (
@@ -25,7 +24,7 @@ export default function HeroSection() {
             </h1>
 
             <p className="au3 mt-5 max-w-xl text-base sm:text-lg text-ink-soft">
-              Book {BUSINESS.name} courts and turfs in seconds — pick a sport, pick a slot, show up &amp; play.
+              Book courts and turfs in seconds — pick a sport, pick a slot, show up &amp; play.
             </p>
 
             <div className="au4 mt-8 flex flex-wrap gap-3">
