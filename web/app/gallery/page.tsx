@@ -52,6 +52,19 @@ const GROUPS: Group[] = [
       { src: "/gallery/silambam1.jpg", alt: "Silambam class at PlayFactory" },
     ],
   },
+  {
+    title: "Achievements",
+    blurb: "Medals, trophies, and the players who've earned them.",
+    photos: [
+      { src: "/gallery/achievements1.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements2.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements3.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements4.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements5.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements6.jpg", alt: "PlayFactory achievement" },
+      { src: "/gallery/achievements7.jpg", alt: "PlayFactory achievement" },
+    ],
+  },
 ];
 
 export default function GalleryPage() {
