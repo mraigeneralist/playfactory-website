@@ -1,15 +1,15 @@
 import type { NextConfig } from "next";
 
-// CSP: the only external host we hit at runtime from the browser is the
-// embedded Google Maps iframe on /contact. Booking traffic flows server-side
-// to the Apps Script webhook so it doesn't need to be in connect-src.
+// CSP: the browser talks to Supabase (REST + auth + realtime) for signup,
+// login, and profile reads. The Google Maps iframe is on /contact. All other
+// booking writes flow server-side and don't need to be in connect-src.
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
   "frame-src 'self' https://www.google.com https://maps.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
