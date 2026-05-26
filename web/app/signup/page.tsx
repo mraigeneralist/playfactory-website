@@ -2,13 +2,12 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { createClient } from "@/lib/supabase/browser";
 
 function SignupContent() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/account";
   const [email, setEmail] = useState("");
@@ -32,6 +31,10 @@ function SignupContent() {
       password,
       options: {
         data: { name: name.trim(), phone },
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+            : undefined,
       },
     });
 
@@ -51,15 +54,17 @@ function SignupContent() {
         .eq("id", data.user.id);
     }
 
-    setLoading(false);
-
-    if (data.session) {
-      router.replace(next);
-      router.refresh();
-    } else {
+    if (!data.session) {
       // Email confirmation required
+      setLoading(false);
       setSuccess(true);
+      return;
     }
+
+    // Full page navigation forces the browser to send the freshly-written
+    // auth cookie on the next request. router.replace would race with the
+    // cookie write and could land on /book before the proxy sees a session.
+    window.location.assign(next);
   }
 
   if (success) {

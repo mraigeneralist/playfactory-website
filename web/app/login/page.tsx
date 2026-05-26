@@ -2,13 +2,12 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { createClient } from "@/lib/supabase/browser";
 
 function LoginContent() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/account";
   const [email, setEmail] = useState("");
@@ -22,13 +21,14 @@ function LoginContent() {
     setError(null);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       setError(error.message);
       return;
     }
-    router.replace(next);
-    router.refresh();
+    // Full page nav so the server proxy sees the freshly-written session
+    // cookie. router.replace can race with the cookie write.
+    window.location.assign(next);
   }
 
   const cameFromRedirect = !!params.get("next");
