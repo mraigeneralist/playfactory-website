@@ -37,5 +37,22 @@ export interface AdminBooking {
   phone: string;
   email: string;
   status: "confirmed" | "cancelled" | "no_show" | "completed";
-  source: "website" | "whatsapp";
+  source: "website" | "whatsapp" | "manual";
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+}
+
+export interface MyBooking {
+  bookingId: string;
+  sportName: string;
+  date: string;
+  slotTime: string;
+  price: number;
+  status: AdminBooking["status"];
+  createdAt: string;
 }

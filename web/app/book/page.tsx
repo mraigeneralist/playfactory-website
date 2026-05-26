@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { SPORTS, BUSINESS, type Sport, type SportId } from "@/lib/constants";
 import type { Slot } from "@/lib/types";
+import { createClient } from "@/lib/supabase/browser";
 import StepIndicator from "@/components/booking/StepIndicator";
 import SportStep from "@/components/booking/SportStep";
 import DateStep from "@/components/booking/DateStep";
@@ -16,6 +17,7 @@ import ConfirmStep from "@/components/booking/ConfirmStep";
 const SS_KEY = "pf-booking";
 
 function BookContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const preselectId = params.get("sport") as SportId | null;
 
@@ -37,12 +39,36 @@ function BookContent() {
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
-  // Restore from sessionStorage on mount
+  // Restore from sessionStorage + prefill from profile on mount
   useEffect(() => {
     if (preselectId) {
       const s = SPORTS.find((x) => x.id === preselectId);
       if (s) setSport(s);
     }
+
+    // Prefill name/phone/email from the logged-in user's profile. The proxy
+    // already guarantees we're authenticated by the time this page renders.
+    (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/login?next=/book");
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name, phone, email")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile) {
+        setName((cur) => cur || profile.name || "");
+        setPhone((cur) => cur || profile.phone || "");
+        setEmail((cur) => cur || profile.email || user.email || "");
+      } else {
+        setEmail((cur) => cur || user.email || "");
+      }
+    })();
+
     const saved = sessionStorage.getItem(SS_KEY);
     if (!saved) return;
     try {
@@ -58,7 +84,7 @@ function BookContent() {
       if (s.email) setEmail(s.email);
       if (s.step && s.step < 5) setStep(s.step);
     } catch {}
-  }, [preselectId]);
+  }, [preselectId, router]);
 
   // Persist to sessionStorage
   useEffect(() => {

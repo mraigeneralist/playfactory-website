@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { SPORTS, type SportId } from "@/lib/constants";
-import { createBooking } from "@/lib/sheets";
+import { createBooking } from "@/lib/db";
+import { sendBookingEmails } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -36,29 +37,27 @@ export async function POST(req: Request) {
     );
   }
 
-  // Verify the sport id exists & price matches (defense against client tampering)
-  const sport = SPORTS.find((s) => s.id === parsed.data.sport);
-  if (!sport) {
-    return NextResponse.json({ success: false, error: "Unknown sport" }, { status: 400 });
-  }
-  if (sport.priceINR !== parsed.data.priceINR) {
-    return NextResponse.json({ success: false, error: "Price mismatch" }, { status: 400 });
-  }
-
-  try {
-    const result = await createBooking(parsed.data);
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error || "Booking failed" },
-        { status: 502 }
-      );
-    }
-    return NextResponse.json({ success: true, bookingId: result.bookingId });
-  } catch (err) {
-    console.error("[booking] error:", err);
+  const result = await createBooking(parsed.data);
+  if (!result.success) {
+    const code = result.error === "Not signed in" ? 401 : 400;
     return NextResponse.json(
-      { success: false, error: "Server error. Please try again." },
-      { status: 500 }
+      { success: false, error: result.error || "Booking failed" },
+      { status: code }
     );
   }
+
+  // Fire-and-forget email notification. Don't block the response on it.
+  sendBookingEmails({
+    bookingId: result.bookingId!,
+    sportName: parsed.data.sportName,
+    date: parsed.data.date,
+    slotTime: parsed.data.slotTime,
+    durationMin: parsed.data.durationMin,
+    priceINR: parsed.data.priceINR,
+    name: parsed.data.name,
+    phone: parsed.data.phone,
+    email: parsed.data.email,
+  }).catch((err) => console.error("[booking] email dispatch failed:", err));
+
+  return NextResponse.json({ success: true, bookingId: result.bookingId });
 }

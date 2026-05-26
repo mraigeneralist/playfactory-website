@@ -12,7 +12,12 @@ const STATUS_STYLES: Record<string, string> = {
   no_show: "bg-amber-100 text-amber-800",
 };
 
-export default function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
+interface Props {
+  bookings: AdminBooking[];
+  onUpdateStatus?: (id: string, status: AdminBooking["status"]) => void;
+}
+
+export default function BookingsTable({ bookings, onUpdateStatus }: Props) {
   const [query, setQuery] = useState("");
   const [sport, setSport] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
@@ -81,12 +86,13 @@ export default function BookingsTable({ bookings }: { bookings: AdminBooking[] }
               <th className="px-4 py-3 font-semibold">Price</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 font-semibold">Source</th>
+              {onUpdateStatus && <th className="px-4 py-3 font-semibold">Actions</th>}
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-muted">
+                <td colSpan={onUpdateStatus ? 8 : 7} className="px-4 py-10 text-center text-muted">
                   No bookings match your filters.
                 </td>
               </tr>
@@ -119,6 +125,22 @@ export default function BookingsTable({ bookings }: { bookings: AdminBooking[] }
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs uppercase tracking-wider text-muted">{b.source}</td>
+                  {onUpdateStatus && (
+                    <td className="px-4 py-3">
+                      <select
+                        value={b.status}
+                        onChange={(e) =>
+                          onUpdateStatus(b.bookingId, e.target.value as AdminBooking["status"])
+                        }
+                        className="rounded-lg border border-border bg-white px-2 py-1 text-xs"
+                      >
+                        <option value="confirmed">confirmed</option>
+                        <option value="completed">completed</option>
+                        <option value="cancelled">cancelled</option>
+                        <option value="no_show">no_show</option>
+                      </select>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

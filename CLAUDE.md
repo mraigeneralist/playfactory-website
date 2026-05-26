@@ -5,76 +5,90 @@
 Three workspaces, no monorepo tooling. Treat them as independent.
 
 ```
-web/             Next.js 16 App Router site (TypeScript, Tailwind 4)
-apps-script/     Google Apps Script (single Code.gs) — the backend
-whatsapp-bot/    Python FastAPI scaffold — not wired yet
+web/                Next.js 16 App Router site (TypeScript, Tailwind 4)
+supabase/           SQL migrations for the Supabase project
+apps-script/        Google Apps Script — email-only worker (no DB role)
+whatsapp-bot/       Python FastAPI scaffold — not wired yet
 ```
+
+## Backend architecture (post-Supabase migration)
+
+**Supabase Postgres is the source of truth.** Four tables:
+- `sports` — courts catalogue (id, name, price, open/close, court count). Anyone can read.
+- `blocked_slots` — owner-managed closures. Anyone can read.
+- `bookings` — append-only log. RLS: customers see only their own; service role bypasses for admin.
+- `profiles` — extends `auth.users` with `name` + `phone`. Auto-created via DB trigger on signup.
+
+**Supabase Auth** handles signup/login (email + password). Sessions live in HTTP-only cookies via `@supabase/ssr`.
+
+**Apps Script** is no longer a database. It's a single-purpose webhook (`action=send_emails`) that sends owner + customer emails via MailApp. Next.js POSTs to it after every booking insert, fire-and-forget.
 
 ## Web app conventions
 
-- **Single source of truth for content & pricing**: `web/lib/constants.ts`. Sports, coaching programs, memberships, business contact details, and all `TODO:`-marked placeholders live here. Every page renders from these arrays — never hardcode another menu item.
-- **App Router**: pages are in `web/app/<route>/page.tsx`. Each page composes section components from `web/components/landing/*` or step components from `web/components/booking/*`.
-- **Styling**: green-and-white via CSS vars in `web/app/globals.css` (`--primary` etc.). Use Tailwind utility classes referencing the custom theme tokens (`bg-primary`, `text-ink`, `border-border`, etc.). Reach for the `gradient-text` and `shadow-soft` / `shadow-rich` helpers for the "rich" feel.
-- **Fonts**: Poppins headings (`var(--font-poppins)`), Inter body — loaded once in `app/layout.tsx`.
-- **Animations**: `ScrollReveal` component fades sections in on intersection. `au1`/`au2`/`au3`/`au4` classes stagger the hero entrance.
-- **No images yet**: gallery and hero use gradient + emoji placeholders. When real photos arrive: drop into `web/public/gallery/*` and swap `<div>` tiles for `<Image>`.
+- **Source of truth for site content** (sports list shown in the UI, coaching catalog, memberships, business contact) is `web/lib/constants.ts`. **The `SPORTS` array there MUST stay in sync with the `sports` table in Supabase.** Add a sport → seed it in both places. The server re-validates sport+price against the DB on booking POST, so mismatches surface clearly.
+- **App Router** — pages in `web/app/<route>/page.tsx`. Auth-required routes (`/book`, `/account`, `/admin`) are enforced in `web/proxy.ts` (Next.js 16's "proxy" convention, formerly `middleware.ts`).
+- **Styling**: green-and-white via CSS vars in `web/app/globals.css`. Tailwind tokens like `bg-primary`, `text-ink`, `border-border` come from `@theme inline { … }`.
+- **Three Supabase clients**, all in `web/lib/supabase/`:
+  - `browser.ts` — for client components.
+  - `server.ts` — for server components, route handlers, the proxy. Uses cookies.
+  - `service.ts` — bypasses RLS, server-only, NEVER imported from anything that runs in the browser.
+- **Data layer**: `web/lib/db.ts` (replaces the old `sheets.ts`). All Supabase reads/writes go through here.
 
 ## Booking flow
 
-`web/app/book/page.tsx` is a 5-step state machine: Sport → Date → Slot → Details → Done. State persists to `sessionStorage` under key `pf-booking`. Two API routes mediate to the Sheets backend:
+`web/app/book/page.tsx` — 5-step state machine: Sport → Date → Slot → Details → Done. State persists to `sessionStorage` under `pf-booking`. On mount: fetches the user's profile and prefills name/phone/email so repeat customers don't retype.
 
-- `GET /api/booking/slots?sport=…&date=…` → `web/app/api/booking/slots/route.ts` → `lib/sheets.ts#fetchSlots` → Apps Script `?action=slots`.
-- `POST /api/booking` → `web/app/api/booking/route.ts` (zod validation + price re-check) → `lib/sheets.ts#createBooking` → Apps Script `doPost`.
+API routes:
+- `GET /api/booking/slots?sport=…&date=…` → `lib/db.ts#fetchSlots` → reads `sports`, counts `bookings`, checks `blocked_slots`.
+- `POST /api/booking` → zod-validates, re-checks price + capacity, INSERTs into `bookings`, fires email webhook in the background.
 
-If the Sheets backend is unreachable, the slots endpoint **falls back to "all open"** so dev still works without env config — see the `try/catch` in `slots/route.ts`. The booking POST does not fall back; it errors clearly.
+## Account & admin
 
-## Admin dashboard
+### `/account` (`app/account/page.tsx` + `AccountClient.tsx`)
+Customer-facing. Tabs: Upcoming bookings, Past bookings, Profile editing. Uses `fetchMyBookings()` which relies on RLS to scope results to the current `auth.uid()`.
 
-- **Routes**: `/admin/login` (public), `/admin` (protected). Guarded by `web/proxy.ts` (Next.js 16 proxy convention — formerly middleware).
-- **Auth**: single shared password from `ADMIN_PASSWORD` env. Session is an HMAC-SHA256 signed cookie (`pf_admin`, 7-day TTL) using `SESSION_SECRET`. Implementation in `web/lib/auth.ts` — Web Crypto only, edge-runtime safe.
-- **Data**: `GET /api/admin/bookings` → `lib/sheets.ts#fetchAllBookings` → Apps Script `?action=admin_bookings&_secret=…`. The Apps Script auths reads with the same `SHEETS_WEBHOOK_SECRET` used for writes.
-- **UI**: stats (today/month/all-time), revenue-last-7-days bar chart, bookings-by-sport donut, upcoming-5 cards, full filterable table. All client-side filtering; loads all bookings in one shot (fine up to ~thousands).
-- **Don't** add admin write actions (cancel, reschedule) yet — the owner should still manage cancellations by editing `status` in the sheet directly. When this gets painful, that's the signal to migrate to Supabase.
+### `/admin` (`app/admin/page.tsx`)
+Owner-facing. Stats cards, recharts charts, full bookings table with **inline status dropdown** to flip bookings to cancelled / completed / no-show. Reads via service role (`fetchAllBookings`); writes via `PATCH /api/admin/bookings`.
 
-## Email notifications
+Access is gated by `ADMIN_EMAIL` env — the proxy checks the logged-in user's email matches.
 
-`apps-script/Code.gs#sendOwnerEmail` and `#sendCustomerEmail` are fired from inside `createBooking` after the row is saved. Both are wrapped in try/catch so a mail failure never breaks the booking response. Owner email goes to `OWNER_EMAIL` (constant at the top of `Code.gs`), customer email only fires if the booking included an email. The first booking after a fresh Apps Script deploy will trigger the Google auth scope prompt for `MailApp`.
+## Apps Script email worker
 
-## Apps Script backend
+`apps-script/Code.gs` only exports `doGet` (health) and `doPost(action=send_emails)`. Auth via `_secret` in the body (Apps Script can't read custom headers). Wrapped in try/catch — email failure logs but doesn't fail the response.
 
-`apps-script/Code.gs` is the entire backend. Three tabs:
-- **Bookings** — append-only log; capacity is computed by counting rows where `status` is not `cancelled` / `no_show`.
-- **Config** — operating hours, slot duration, court count, price per sport. The web `SPORTS` array must stay in sync.
-- **Blocked** — owner manually adds rows here to mark slots unavailable.
-
-`LockService` serializes booking writes within a script instance — sufficient for this scale. The shared secret is sent in the request body (`_secret`) because Apps Script doPost cannot read custom headers reliably.
+Owner: `OWNER_EMAIL` constant at top of `Code.gs`. Customer: only if `b.email` is non-empty (it always is now, since the form requires email).
 
 ## WhatsApp bot
 
-Scaffold only. `whatsapp-bot/main.py` boots and exposes routes but Meta credentials are empty. Activation steps live in `whatsapp-bot/README.md` and `SETUP.md` step 6. Hot spots to know:
-- `bot/flow_endpoint.py` handles the AES-GCM encrypted Flow data exchange.
-- `bot/reminders.py` expects an `action=bookings_today` endpoint in `Code.gs` that isn't built yet — add it before enabling reminders, or migrate to Supabase first.
-- `flows/booking_flow.json` is the Flow definition Meta needs.
+Scaffold only. `whatsapp-bot/main.py` boots and exposes routes but Meta credentials are empty. When activated, `bot/sheets.py` should be rewritten to `bot/db.py` using the Supabase Python client + service role key — it can then write to the same `bookings` table.
 
 ## Common tasks
 
 ### Adding a new sport
-1. Add an entry to `SPORTS` in `web/lib/constants.ts`.
-2. Add a matching row to the `Config` tab of the live Google Sheet.
-3. (Optional) Add to `SPORTS_FOR_FLOW` in `whatsapp-bot/bot/flow_endpoint.py`.
+1. Insert a row in Supabase `sports` (Table Editor or SQL).
+2. Add an entry to `SPORTS` in `web/lib/constants.ts` matching the same `id` + `price_inr`.
 
-### Changing prices / business details
-Edit `web/lib/constants.ts`. Push, deploy. Update the Sheet's `Config.price` column too if booking price changed.
+### Changing prices
+1. Update Supabase `sports.price_inr` for the affected row.
+2. Update the matching entry in `web/lib/constants.ts` so the UI shows the new price before the server re-validates.
 
-### Adding a coaching program
-Edit the `COACHING` array in `web/lib/constants.ts`. The coaching page groups by category automatically.
+### Blocking a slot
+Supabase → `blocked_slots` → Insert row. No deploy needed.
 
-### Local testing without Sheets
-`npm run dev` still works — slots are shown as all-open and booking POSTs will fail with a clear "Sheets backend not configured" message. Set `SHEETS_WEBHOOK_URL` + `SHEETS_WEBHOOK_SECRET` in `.env.local` to test the full path.
+### Making someone the owner
+Set `ADMIN_EMAIL` env to their email. They sign up via `/signup` with that email. Done.
 
 ## What NOT to do
 
-- Don't add OTP / phone verification yet — the Sheets backend can't store transient state cleanly. Wait for the Supabase migration.
-- Don't introduce a payments integration — the spec is pay-on-arrival.
-- Don't add an admin dashboard inside the Next.js app. The owner manages everything via the Google Sheet directly.
-- Don't switch `SPORTS` to load from the Sheet at runtime. The website's constant-file approach gives instant page loads and lets the marketing copy reference prices server-side without an API call.
+- Don't reintroduce a Sheets-based data path. Apps Script is email-only now.
+- Don't bypass RLS by using the service-role client from a browser-facing component. Always: browser → API route → service client.
+- Don't store the service role key in `NEXT_PUBLIC_*` (it's prefix-only protected by convention; the actual leak is your fault if you do this).
+- Don't add payment processing — the spec is pay-on-arrival.
+- Don't add a separate password-reset flow; Supabase Auth already provides one via the dashboard — link from the login page when needed.
+
+## Things that are intentionally NOT here yet
+
+- Password reset UI (Supabase has the backend; UI not built — easy add)
+- "Cancel my booking" button on `/account` (RLS already allows it; UI not built)
+- Email change in profile (intentionally disabled — Supabase email change is a multi-step flow with verification; deferred)
+- WhatsApp wiring (separate session)

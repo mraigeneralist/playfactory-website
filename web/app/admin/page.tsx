@@ -47,8 +47,22 @@ export default function AdminDashboard() {
   }, [router]);
 
   async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.replace("/admin/login");
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login?next=/admin");
+    router.refresh();
+  }
+
+  async function updateStatus(bookingId: string, status: AdminBooking["status"]) {
+    const res = await fetch("/api/admin/bookings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, status }),
+    });
+    if (res.ok) {
+      setBookings((prev) =>
+        prev.map((b) => (b.bookingId === bookingId ? { ...b, status } : b))
+      );
+    }
   }
 
   // ── derived metrics ───────────────────────────────────────────────────────
@@ -180,7 +194,7 @@ export default function AdminDashboard() {
             {/* Full table */}
             <section>
               <h2 className="font-heading text-lg font-bold text-ink mb-3">All bookings</h2>
-              <BookingsTable bookings={bookings} />
+              <BookingsTable bookings={bookings} onUpdateStatus={updateStatus} />
             </section>
           </>
         )}

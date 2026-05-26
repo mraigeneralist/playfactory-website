@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { BUSINESS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/browser";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -15,6 +16,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -23,23 +25,26 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <header
       className={`sticky top-0 z-40 w-full transition-all ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-md border-b border-border shadow-soft"
-          : "bg-transparent"
+        scrolled ? "bg-white/90 backdrop-blur-md border-b border-border shadow-soft" : "bg-transparent"
       }`}
       style={{ height: "var(--nav-h)" }}
     >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">
-            P
-          </span>
-          <span className="font-heading text-xl font-bold text-primary-deep">
-            {BUSINESS.name}
-          </span>
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold">P</span>
+          <span className="font-heading text-xl font-bold text-primary-deep">{BUSINESS.name}</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-7">
@@ -52,6 +57,21 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          {signedIn === false ? (
+            <Link
+              href="/login"
+              className="text-sm font-semibold text-primary-dark hover:text-primary"
+            >
+              Sign in
+            </Link>
+          ) : signedIn ? (
+            <Link
+              href="/account"
+              className="text-sm font-semibold text-primary-dark hover:text-primary"
+            >
+              My Account
+            </Link>
+          ) : null}
           <Link
             href="/book"
             className="btn-primary rounded-full px-5 py-2.5 text-sm"
@@ -88,6 +108,23 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
+            {signedIn === false ? (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface"
+              >
+                Sign in
+              </Link>
+            ) : signedIn ? (
+              <Link
+                href="/account"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface"
+              >
+                My Account
+              </Link>
+            ) : null}
             <Link
               href="/book"
               onClick={() => setOpen(false)}

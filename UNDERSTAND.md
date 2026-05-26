@@ -4,178 +4,173 @@
 
 ## What you're getting
 
-A complete, deployable marketing + booking site for PlayFactory, plus a half-built WhatsApp bot. Three pieces:
-
 | Piece | Lives in | Status | Purpose |
 |---|---|---|---|
-| **Website** | `web/` | Done — deploy & go | Customer-facing marketing pages + online slot booking |
-| **Sheet backend** | `apps-script/Code.gs` | Done — paste into Google Sheet | The "database" the website talks to |
+| **Website** | `web/` | Done — deploy & go | Marketing pages + customer accounts + online slot booking + owner dashboard |
+| **Database + Auth** | Supabase project | Done — run the SQL once | All bookings, sports config, blocked slots, customer profiles, login/signup |
+| **Email worker** | `apps-script/Code.gs` | Done — paste & deploy | Sends the two booking-confirmation emails on every booking |
 | **WhatsApp bot** | `whatsapp-bot/` | Scaffolded, not wired | Customers book by chatting; auto reminder messages |
 
-The website works the moment you connect it to the Sheet. The WhatsApp bot is ready to activate when you've gone through Meta Business onboarding (covered in SETUP step 6).
+---
+
+## Tech choices
+
+| Layer | Pick | Reason |
+|---|---|---|
+| Frontend | Next.js 16 + Tailwind 4 | Fast, modern, easy Vercel deploys |
+| Data | Supabase Postgres | Real DB with auth, RLS, free tier; trivial migration path off Sheets |
+| Auth | Supabase Auth (email + password) | Sessions, hashing, password reset — all free, all standard |
+| Email | Apps Script + Gmail | Free, no third-party email service to maintain. Apps Script is just a "send these 2 emails" worker |
+| Hosting | Vercel | One-click deploys, free tier sufficient |
+| WhatsApp bot | FastAPI on Vercel + cron-job.org | Same pattern as RoadRunners |
 
 ---
 
-## Why these tech choices
-
-| Choice | Reason |
-|---|---|
-| **Next.js 16 on Vercel** | Easy deploys, fast pages, great DX. Vercel's free tier covers PlayFactory's traffic for years. |
-| **Tailwind CSS** | No CSS sprawl. Every spacing/color decision visible at the markup level. |
-| **Google Sheet (via Apps Script)** | PlayFactory's staff can read & edit bookings without learning a database. Zero hosting cost, no GCP project needed. We can swap for a real DB later without touching the UI. |
-| **WhatsApp Flows** | One-tap booking inside WhatsApp — no app install, no website handoff. The same Sheet logs both website AND WhatsApp bookings. |
-
----
-
-## Data flow — booking a slot from the website
+## How a booking flows end-to-end
 
 ```
 [Customer browser]
-       │ visits /book
+       │ Goes to /book
        ▼
-[Next.js page]  ── multi-step form, state in sessionStorage
-       │ GET /api/booking/slots?sport=…&date=…
+[Next.js proxy.ts]  ── checks Supabase session
+       │ Not signed in? → redirect to /login
        ▼
-[Next.js API route]  ── /web/app/api/booking/slots/route.ts
-       │ (server-side fetch)
+[/book page]  ── prefills name + phone + email from profiles row
+       │ Customer picks sport → date → slot → confirms
+       │ POST /api/booking
        ▼
-[Apps Script Web App]  ── doGet(action=slots)
-       │ reads Config + Bookings + Blocked tabs
+[/api/booking]  ── zod-validates payload
+       │ Calls createBooking() in lib/db.ts
        ▼
-[Google Sheet]
-       │ returns [{time, remaining, available}, …]
-       ▼
-[Customer browser]  ── shows green/grey slot grid
-
-(then…)
-       │ POST /api/booking  (with name+phone+choice)
-       ▼
-[Next.js API route]  ── zod-validates, re-checks price
+[Supabase]
+       ├─ Re-validates sport + price against `sports` table
+       ├─ Counts existing confirmed bookings for that slot
+       ├─ Checks `blocked_slots`
+       ├─ INSERT into `bookings` (user_id = auth.uid via RLS)
        │
+[/api/booking]  ── fires sendBookingEmails() (don't await)
+       │ POST to Apps Script with action=send_emails
        ▼
-[Apps Script Web App]  ── doPost(action=book)
-       │ LockService → re-checks capacity → appends row
-       ▼
-[Google Sheet]  ── new row in "Bookings"
+[Apps Script]  ── sends owner email + customer email via MailApp
        │
-       ▼
-[Customer browser]  ── booking ID + confirmation screen
+[Customer browser]  ── confirmation screen with booking ID
 ```
 
 ---
 
 ## Folder-by-folder
 
-### `web/` — the Next.js site
-- **`app/layout.tsx`** — wraps every page; loads Poppins + Inter fonts.
-- **`app/page.tsx`** — the home page; composes 6 sections from `components/landing/`.
-- **`app/book/page.tsx`** — the 5-step booking machine. Persists state to `sessionStorage` so customers can refresh / hit Back without losing progress.
-- **`app/coaching/page.tsx`**, **`memberships/page.tsx`**, **`contact/page.tsx`**, **`gallery/page.tsx`** — secondary pages, all rendered from arrays in `lib/constants.ts`.
-- **`app/api/booking/route.ts`** — POST endpoint: validates payload, forwards to Sheets.
-- **`app/api/booking/slots/route.ts`** — GET endpoint: returns availability.
-- **`components/landing/`** — Hero, SportsSection, CoachingPreview, MembershipsPreview, WhySection, CTASection, Navbar, Footer.
-- **`components/booking/`** — the 5 step components + StepIndicator.
-- **`components/ui/`** — `ScrollReveal` (fade-up on scroll) and `WhatsAppFloat` (sticky chat button).
-- **`lib/constants.ts`** — ★ **the file you'll edit most**. Sports list, prices, court counts, coaching programs, memberships, business contact. Every `TODO:` placeholder lives here.
-- **`lib/sheets.ts`** — server-only Apps Script client. Reads `SHEETS_WEBHOOK_URL` and `SHEETS_WEBHOOK_SECRET` from env.
-- **`lib/slots.ts`** — pure helpers: generate hourly slots, format times.
-- **`lib/types.ts`** — shared TypeScript types.
+### `web/` — Next.js site
+- **`app/`** — pages and API routes (App Router).
+  - `page.tsx` — landing.
+  - `book/page.tsx` — 5-step booking flow; requires Supabase session.
+  - `login/`, `signup/` — Supabase Auth sign-in/sign-up flows.
+  - `auth/callback/route.ts` — Supabase magic-link / email-confirm landing.
+  - `account/` — customer profile + booking history (upcoming + past tabs).
+  - `admin/` — owner dashboard (stats, charts, full bookings table with status mutations).
+  - `api/booking/` — slot availability + booking create.
+  - `api/admin/bookings/` — GET (list all) + PATCH (update status). Service role only.
+  - `api/auth/logout/` — Supabase signOut.
+- **`components/`**
+  - `landing/` — home page sections.
+  - `booking/` — the 5 step components + StepIndicator.
+  - `account/`-style components live inline in `app/account/AccountClient.tsx`.
+  - `admin/` — StatCard, Charts (recharts), BookingsTable.
+  - `ui/` — ScrollReveal, WhatsAppFloat.
+  - `auth/AuthShell.tsx` — shared layout for login/signup pages.
+- **`lib/`**
+  - `constants.ts` — site content (sports, coaching, memberships, business contact). Sports list MUST stay in sync with the `sports` table in Supabase. Edit both when adding/removing a sport.
+  - `db.ts` — Supabase-backed data layer (slots, booking create, admin list, profile bookings). Replaces the old `sheets.ts`.
+  - `email.ts` — POSTs booking details to Apps Script for email send.
+  - `supabase/browser.ts`, `supabase/server.ts`, `supabase/service.ts` — three Supabase client flavours.
+  - `slots.ts`, `types.ts` — pure helpers + shared types.
+- **`proxy.ts`** — auth gate. Protects `/book`, `/account`, `/admin`. Admin requires email to match `ADMIN_EMAIL`.
 
-### `apps-script/Code.gs` — the backend
-- One file. Paste into the Apps Script editor attached to your Google Sheet.
-- Exposes two routes: `doGet` (read slots) and `doPost` (write a booking).
-- Uses `LockService` to prevent two bookings racing for the same last court.
-- Validates a shared secret on every POST.
+### `apps-script/Code.gs`
+The entire backend used to live here. Now it's just a webhook that receives `action=send_emails` and sends the two emails. No database role.
 
-### `whatsapp-bot/` — the WhatsApp scaffold
-- **`main.py`** — FastAPI app. Health check, webhook verify, message webhook, Flow endpoint, reminder cron.
-- **`bot/config.py`** — env-driven settings.
-- **`bot/sheets.py`** — Python twin of `web/lib/sheets.ts` — talks to the same Apps Script Web App.
-- **`bot/whatsapp.py`** — Cloud API wrapper (send text, open a Flow).
-- **`bot/flow_endpoint.py`** — handles Meta's encrypted Flow data exchange. Decrypts → routes to the right screen → re-encrypts.
-- **`bot/reminders.py`** — every 5 minutes, scans today's bookings, sends 1h/30m/10m reminders.
-- **`flows/booking_flow.json`** — the Flow JSON Meta uploads into your business account.
+### `supabase/migrations/`
+SQL migrations. Run them in the Supabase SQL Editor. The initial `0001_initial_schema.sql` creates everything.
 
----
-
-## The Google Sheet — three tabs
-
-### `Bookings` (append-only log)
-| Column | Notes |
-|---|---|
-| `booking_id` | Generated by Apps Script: `PF20260527-070000-001` |
-| `created_at` | Timestamp |
-| `sport` | The id (e.g. `badminton-court`) |
-| `sport_name` | Human label |
-| `date` | YYYY-MM-DD |
-| `slot_time` | `07:00` |
-| `duration_min`, `price`, `name`, `phone`, `email` | self-explanatory |
-| `status` | `confirmed` / `cancelled` / `no_show` |
-| `source` | `website` / `whatsapp` |
-
-To cancel a booking: set `status = cancelled`. That row no longer counts toward capacity.
-
-### `Config` (lookup table)
-One row per sport. Defines opening hours, slot length, parallel court count, and price. **Must stay in sync with `SPORTS` in `web/lib/constants.ts`.**
-
-### `Blocked` (manual closures)
-Add a row to block a specific date+sport+slot (use `*` in the sport column to block all sports for that time). Useful for tournaments, maintenance, holidays.
+### `whatsapp-bot/`
+FastAPI scaffold. Not wired. Will eventually share the same Supabase tables (rewrite `bot/sheets.py` → `bot/db.py` pointing at Supabase).
 
 ---
 
-## What happens when…
+## Supabase schema
 
-**…a customer books a slot at 7pm but two friends try at the same instant?**
-The Apps Script holds a script-wide `LockService` lock through capacity check + write. Only one wins; the others get "this slot just got fully booked".
+### `sports`
+PK = `id` (e.g. `badminton-court`). Has `price_inr`, `courts`, `open_time`, `close_time`, `is_active`, etc. Anyone can read; only service role writes.
 
-**…the Apps Script Web App is down?**
-The slots endpoint quietly falls back to "all open" so the site doesn't break. The booking POST fails loudly with an error the customer sees.
+### `blocked_slots`
+Owner manually adds rows (Supabase Table Editor) to block a slot for maintenance / tournaments. `sport_id = NULL` blocks all sports for that time. Anyone can read.
 
-**…the owner wants to block tomorrow morning?**
-Open the Sheet → `Blocked` tab → add `2026-05-28 | * | 06:00 | Maintenance` rows. Done — booking page reflects instantly (no deploy).
+### `bookings`
+The booking log. `user_id` FK to `auth.users` ties each booking to the customer who made it. RLS:
+- Customers can read **only** rows where `user_id = auth.uid()`
+- Customers can insert bookings only with their own `user_id`
+- Customers can cancel (update status to 'cancelled') their own bookings
+- Service role (used by admin endpoints) bypasses RLS
 
-**…you want to change a price?**
-Edit `web/lib/constants.ts` → push → Vercel auto-deploys. **Also** update the matching row in the Sheet's `Config` tab so the server-side capacity check uses the new price.
+### `profiles`
+One row per `auth.users` row, auto-created by the `on_auth_user_created` trigger. Stores `name` + `phone`. Customer can read/update only their own.
+
+---
+
+## Auth model
+
+- **Customers** sign up at `/signup` with email + password. Supabase Auth handles hashing, sessions, password reset emails. A row is auto-created in `profiles` via DB trigger.
+- **Owner** signs up the same way, but the email they use must match `ADMIN_EMAIL` env. The proxy checks this on every `/admin/*` request.
+- Sessions are HTTP-only cookies managed by `@supabase/ssr`. They refresh automatically.
 
 ---
 
 ## Admin dashboard & notifications
 
 ### Owner dashboard at `/admin`
-- Owner visits `/admin/login`, enters `ADMIN_PASSWORD`, gets a 7-day session cookie.
-- Dashboard shows: today's count + revenue, month-to-date, all-time, revenue-by-day chart, bookings-by-sport donut, next 5 upcoming slots, and a fully filterable table of every booking.
-- Auth lives in `web/lib/auth.ts` (signed-cookie HMAC, no third-party libs); the `web/proxy.ts` file enforces it on every `/admin/*` and `/api/admin/*` request.
-- Data is pulled live from the Sheet via a new `?action=admin_bookings` endpoint in `Code.gs`, protected by the same `SHEETS_WEBHOOK_SECRET`.
+- Today / month / all-time stat cards (bookings count + revenue)
+- Revenue last 7 days bar chart
+- Bookings-by-sport donut
+- Next 5 upcoming slots
+- Full searchable + filterable bookings table with **inline status dropdown** to mark bookings cancelled / completed / no-show. Writes go to Supabase via service role.
 
-### Notifications
-Every booking that gets saved triggers two emails (sent by Apps Script's built-in `MailApp`, from the Google account that owns the script):
+### Email notifications
+Every successful booking insert kicks off a background `fetch()` to the Apps Script webhook, which sends:
+1. **Owner email** at `OWNER_EMAIL` — sport, time, customer name + phone, price.
+2. **Customer email** at the email field on the booking — branded confirmation with booking ID + address. (Email field is required, captured from the profile prefill.)
 
-1. **Owner** — gets an HTML summary email at `OWNER_EMAIL` with all booking details + customer contact. Subject line includes sport + date + time so it's scan-friendly in the inbox.
-2. **Customer** — gets a clean confirmation email **only if they provided one**. Contains booking ID, time, address, phone.
+Failures are logged but never bubble back to the customer — the row is already saved.
 
-Both sends are wrapped in try/catch so a mail failure never breaks the booking itself. Google's free quota (1500 emails/day on personal Gmail) is more than enough.
+---
 
-> SMS / WhatsApp customer notifications come later via the WhatsApp bot. The "Save to WhatsApp" button on the confirmation screen lets customers who skipped email forward themselves a summary.
+## What happens when…
 
-## Migration path: Sheets → Supabase (future)
+**…the customer hits /book without an account?**
+Proxy redirects to `/login?next=/book`. After login, they bounce back to /book with name/phone/email auto-filled from their profile.
 
-When PlayFactory outgrows the Sheet (think >100 bookings/day or wanting an admin dashboard), the migration is small:
+**…two customers try to book the same last slot?**
+Both POSTs run a count query on `bookings` first. The first to finish gets the row; the second's count comes back equal to `sport.courts` and the response is "slot just got fully booked." Not 100% race-proof (no row-level lock), but Postgres is fast enough that for PlayFactory's scale it's effectively safe. If it ever becomes an issue, we can add an `EXCLUDE` constraint or a serializable transaction.
 
-1. Create Supabase project; run a schema close to the Sheet tabs (`appointments`, `services`, `blocked_dates`).
-2. Replace `web/lib/sheets.ts` with a Supabase client — same `fetchSlots` / `createBooking` signatures.
-3. Add OTP verification at this point (the RoadRunners code in `WhatsAppBooking/` is a good reference).
-4. The WhatsApp bot's `bot/sheets.py` becomes `bot/db.py` pointing at the same Supabase tables.
+**…the owner wants to block tomorrow morning?**
+Supabase → Table Editor → `blocked_slots` → Insert row(s). Booking page reflects instantly (no deploy).
 
-The UI / pages / styling / WhatsApp Flow JSON stay untouched.
+**…you want to change a price?**
+Two places, in this order:
+1. Supabase → `sports` → update `price_inr`.
+2. `web/lib/constants.ts` → update the matching `priceINR` (used by the booking UI to show price before the server confirms).
+
+**…the Apps Script email worker is down?**
+The booking still succeeds. The owner just doesn't get an email until you fix it. The customer also doesn't get one, but the on-screen confirmation tells them they're booked.
 
 ---
 
 ## Security notes
 
-- The Apps Script shared secret (`SHEETS_WEBHOOK_SECRET`) is checked on every POST. Treat it like a password — rotate by changing the value in both `Code.gs` and `.env.local`, then redeploying both.
-- `web/next.config.ts` ships strict CSP, HSTS, and frame-ancestors=none headers — clickjacking is blocked by default.
-- We don't store payment info anywhere — payment is on arrival.
-- Phone numbers are stored in plain text in the Sheet. That's fine for this scale + audience; revisit if you ever scrape data out.
+- `SUPABASE_SERVICE_ROLE_KEY` is the most sensitive value in the project — it bypasses RLS. Only `lib/supabase/service.ts` reads it, and that file is server-only. Never expose it to the browser.
+- The shared secret between Next.js and Apps Script (`SHEETS_WEBHOOK_SECRET`) gates email sends. Rotate it by updating both `Code.gs` and Vercel env, then redeploying both.
+- RLS policies enforce that customers can never see another customer's bookings or profile.
+- `next.config.ts` ships strict CSP, HSTS, frame-ancestors=none.
+- We don't store payment info — payment is on arrival.
 
 ---
 
@@ -183,7 +178,8 @@ The UI / pages / styling / WhatsApp Flow JSON stay untouched.
 
 - Photos / branding (we used emoji + gradient placeholders).
 - Wiring real Meta credentials for the WhatsApp bot.
-- Migrating to Supabase + adding an admin dashboard.
-- Add-ons: payments (Razorpay), GSTBilling, automated tournament brackets.
+- Migrating the WhatsApp bot's data layer from the Apps Script bridge to Supabase directly.
+- SMS notifications (Twilio / MSG91) if email isn't enough.
+- Razorpay payments if you want to take advance payment.
 
 Any of those — open a new conversation and reference this file.
