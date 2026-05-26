@@ -22,6 +22,9 @@ export default async function AccountPage() {
 
   const bookings = await fetchMyBookings();
 
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+  const isAdmin = !!adminEmail && user.email?.toLowerCase() === adminEmail;
+
   return (
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
@@ -45,6 +48,7 @@ export default async function AccountPage() {
           phone: profile?.phone || "",
         }}
         bookings={bookings}
+        isAdmin={isAdmin}
       />
     </div>
   );

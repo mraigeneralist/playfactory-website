@@ -12,6 +12,7 @@ import type { MyBooking } from "@/lib/types";
 interface Props {
   initialProfile: { email: string; name: string; phone: string };
   bookings: MyBooking[];
+  isAdmin?: boolean;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -21,7 +22,7 @@ const STATUS_STYLES: Record<string, string> = {
   no_show: "bg-amber-100 text-amber-800",
 };
 
-export default function AccountClient({ initialProfile, bookings }: Props) {
+export default function AccountClient({ initialProfile, bookings, isAdmin }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<"upcoming" | "past" | "profile">("upcoming");
 
@@ -54,12 +55,26 @@ export default function AccountClient({ initialProfile, bookings }: Props) {
             Hi {initialProfile.name || "there"} 👋
           </h1>
         </div>
-        <button
-          onClick={logout}
-          className="rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-ink-soft hover:bg-surface"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary-deep px-4 py-2 text-xs font-semibold text-white hover:bg-primary-dark transition-colors"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+              Owner Dashboard
+            </Link>
+          )}
+          <button
+            onClick={logout}
+            className="rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-ink-soft hover:bg-surface"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {/* Tab nav */}
