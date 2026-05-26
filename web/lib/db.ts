@@ -7,7 +7,7 @@
 
 import { createClient as createServerSupabase } from "./supabase/server";
 import { createServiceClient } from "./supabase/service";
-import { generateHourlySlots } from "./slots";
+import { generateHourlySlots, nowInIST } from "./slots";
 import type {
   AdminBooking,
   BookingPayload,
@@ -91,10 +91,23 @@ export async function fetchSlots(params: {
     }
   });
 
+  // If the customer is booking for today, slots whose start time has already
+  // passed (in IST, where the business operates) must be hidden. A small
+  // buffer (15 min) prevents "book a slot starting in 2 minutes" surprises.
+  const ist = nowInIST();
+  const isToday = ist.date === params.date;
+  const cutoffMinutes = ist.minutes + 15;
+
   return all.map((time) => {
     const used = counts.get(time) || 0;
     const isBlocked = blocked.has(time);
-    const remaining = isBlocked ? 0 : Math.max(0, sport.courts - used);
+    let remaining = isBlocked ? 0 : Math.max(0, sport.courts - used);
+
+    if (isToday) {
+      const [h, m] = time.split(":").map(Number);
+      if (h * 60 + m <= cutoffMinutes) remaining = 0;
+    }
+
     return { time, remaining, available: remaining > 0 };
   });
 }

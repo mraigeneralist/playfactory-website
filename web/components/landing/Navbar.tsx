@@ -17,6 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [initial, setInitial] = useState<string>("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -27,10 +28,25 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+
+    const hydrate = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSignedIn(!!session);
-    });
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        const source = profile?.name || session.user.email || "";
+        setInitial(source.trim().charAt(0).toUpperCase() || "?");
+      } else {
+        setInitial("");
+      }
+    };
+    hydrate();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(() => hydrate());
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -57,27 +73,33 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          {signedIn === false ? (
-            <Link
-              href="/login"
-              className="text-sm font-semibold text-primary-dark hover:text-primary"
-            >
-              Sign in
-            </Link>
-          ) : signedIn ? (
-            <Link
-              href="/account"
-              className="text-sm font-semibold text-primary-dark hover:text-primary"
-            >
-              My Account
-            </Link>
-          ) : null}
           <Link
             href="/book"
             className="btn-primary rounded-full px-5 py-2.5 text-sm"
           >
             Book a Slot
           </Link>
+          {signedIn === false ? (
+            <Link
+              href="/login"
+              aria-label="Sign in"
+              title="Sign in"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-ink-soft hover:border-primary hover:text-primary transition-colors"
+            >
+              <UserIcon className="h-5 w-5" />
+            </Link>
+          ) : signedIn ? (
+            <Link
+              href="/account"
+              aria-label="My account"
+              title="My account"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-bold shadow-soft hover:shadow-rich transition-shadow"
+            >
+              {initial}
+            </Link>
+          ) : (
+            <span className="inline-block h-10 w-10" />
+          )}
         </nav>
 
         <button
@@ -112,16 +134,19 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface"
+                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface flex items-center gap-2"
               >
-                Sign in
+                <UserIcon className="h-5 w-5" /> Sign in
               </Link>
             ) : signedIn ? (
               <Link
                 href="/account"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface"
+                className="rounded-lg px-3 py-3 text-base font-semibold text-primary-dark hover:bg-surface flex items-center gap-2"
               >
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white text-xs font-bold">
+                  {initial}
+                </span>
                 My Account
               </Link>
             ) : null}
@@ -136,5 +161,22 @@ export default function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+function UserIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
   );
 }

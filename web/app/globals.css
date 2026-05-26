@@ -124,44 +124,77 @@ h1, h2, h3, h4 { font-family: var(--font-poppins), system-ui, sans-serif; letter
   :root { --nav-h: 64px; }
 }
 
-/* react-day-picker — green theme */
+/* react-day-picker — green theme.
+   The blue tint we used to see on un-selected upcoming days (28, 29, 30, …)
+   came from the browser default `accent-color: blue` applied to day buttons,
+   plus the rdp default range-middle highlight. We override every relevant
+   var + selector below. */
 .rdp-root {
   --rdp-accent-color: var(--primary);
   --rdp-accent-background-color: var(--primary-soft);
   --rdp-selected-border: none;
   --rdp-today-color: var(--primary-dark);
+  --rdp-day_button-border-radius: 0.5rem;
+  --rdp-day_button-border: 1px solid transparent;
   --rdp-disabled-opacity: 0.35;
+  --rdp-range_middle-color: var(--ink);
+  --rdp-range_middle-background-color: var(--primary-soft);
+  --rdp-range_start-color: #fff;
+  --rdp-range_end-color: #fff;
+  --rdp-outside-opacity: 0.45;
+  accent-color: var(--primary);
   margin: 0 auto;
 }
+.rdp-root *,
+.rdp-root *::before,
+.rdp-root *::after { accent-color: var(--primary); }
 .rdp-root *:focus,
 .rdp-root *:focus-visible { outline: none !important; box-shadow: none !important; }
+
 .rdp-root .rdp-month_caption { color: var(--primary-dark); font-weight: 600; }
-.rdp-root .rdp-weekday { color: var(--muted); }
-.rdp-root .rdp-day_button { color: var(--ink); border-radius: 0.5rem; }
-.rdp-root .rdp-day_button:hover { background: var(--primary-soft); }
-.rdp-root .rdp-selected .rdp-day_button {
-  background: var(--primary);
-  color: #fff;
+.rdp-root .rdp-weekday { color: var(--muted); font-weight: 600; }
+
+.rdp-root .rdp-day_button {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+}
+.rdp-root .rdp-day_button:hover {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  border-color: transparent;
+}
+.rdp-root .rdp-selected .rdp-day_button,
+.rdp-root .rdp-selected .rdp-day_button:hover {
+  background: var(--primary) !important;
+  color: #fff !important;
   font-weight: 700;
+  border-color: var(--primary) !important;
 }
 .rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
   color: var(--primary-dark);
   font-weight: 700;
+  background: transparent;
 }
+.rdp-root .rdp-outside .rdp-day_button { color: var(--muted); }
+.rdp-root .rdp-disabled .rdp-day_button {
+  color: var(--muted) !important;
+  background: transparent !important;
+  opacity: 0.35;
+}
+
 .rdp-root .rdp-button_previous,
 .rdp-root .rdp-button_next {
   color: var(--muted);
+  background: transparent;
+  border: none;
+}
+.rdp-root .rdp-button_previous:hover,
+.rdp-root .rdp-button_next:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
 }
 .rdp-root .rdp-button_previous svg,
-.rdp-root .rdp-button_next svg {
-  color: var(--muted);
-  fill: var(--muted);
-}
-.rdp-root .rdp-button_previous:hover svg,
-.rdp-root .rdp-button_next:hover svg {
-  color: var(--primary);
-  fill: var(--primary);
-}
-.rdp-root .rdp-chevron { fill: var(--muted); }
-.rdp-root .rdp-button_previous:hover .rdp-chevron,
-.rdp-root .rdp-button_next:hover .rdp-chevron { fill: var(--primary); }
+.rdp-root .rdp-button_next svg,
+.rdp-root .rdp-chevron { color: currentColor; fill: currentColor; }

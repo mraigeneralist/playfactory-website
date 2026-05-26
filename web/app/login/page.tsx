@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { createClient } from "@/lib/supabase/browser";
 
 function LoginContent() {
@@ -56,12 +57,11 @@ function LoginContent() {
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">Password</label>
-          <input
-            type="password"
-            required
+          <PasswordInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-border bg-white px-4 py-3 text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            onChange={setPassword}
+            required
+            autoComplete="current-password"
           />
         </div>
         {error && (
