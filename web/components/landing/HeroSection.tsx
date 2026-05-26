@@ -11,14 +11,14 @@ export default function HeroSection() {
       <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-primary-bright/10 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-12 pb-16 md:pt-20 md:pb-24">
-        <div className="grid items-center gap-10 md:gap-12 md:grid-cols-2">
+        <div className="grid items-center gap-10 lg:gap-12 lg:grid-cols-2">
           <div>
             <div className="au1 mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-dark">
               <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
               Now open — Book online
             </div>
 
-            <h1 className="au2 font-heading text-[2rem] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] text-ink">
+            <h1 className="au2 font-heading text-[2rem] sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-extrabold leading-[1.05] text-ink">
               <span className="whitespace-nowrap">Play 24×7.</span>
               <br />
               <span className="gradient-text whitespace-nowrap">Book in seconds.</span>
@@ -65,7 +65,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="au3 relative px-6 sm:px-8 md:px-0 pt-6 md:pt-0 pb-10 md:pb-0">
+          <div className="au3 relative px-6 sm:px-8 lg:px-0 pt-6 lg:pt-0 pb-10 lg:pb-0">
             <div className="relative aspect-square max-w-md mx-auto">
               <div className="absolute inset-0 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-primary via-primary-dark to-primary-deep shadow-rich" />
               <div className="absolute inset-3 rounded-[1.7rem] sm:rounded-[2.2rem] bg-white overflow-hidden flex items-center justify-center">
