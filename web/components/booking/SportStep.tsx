@@ -46,7 +46,7 @@ export default function SportStep({ selected, onSelect, onNext }: Props) {
           onClick={onNext}
           className="btn-primary rounded-full px-7 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Continue →
+          Continue
         </button>
       </div>
     </div>
