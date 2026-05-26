@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { fetchAllBookings, updateBookingStatus } from "@/lib/db";
+import { isAdmin } from "@/lib/supabase/auth";
 import type { AdminBooking } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   try {
     const bookings = await fetchAllBookings();
     return NextResponse.json({ bookings });
@@ -15,6 +19,9 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   let body: { bookingId?: string; status?: AdminBooking["status"] };
   try {
     body = await req.json();
