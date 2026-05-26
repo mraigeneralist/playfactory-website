@@ -21,7 +21,7 @@ export default function HeroSection() {
             <h1 className="au2 font-heading text-[2.6rem] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.02] text-ink">
               Play 24×7.
               <br />
-              <span className="gradient-text">Hassle never.</span>
+              <span className="gradient-text">Book in seconds.</span>
             </h1>
 
             <p className="au3 mt-5 max-w-xl text-base sm:text-lg text-ink-soft">
