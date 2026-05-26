@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { BUSINESS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/browser";
@@ -14,10 +15,20 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [initial, setInitial] = useState<string>("");
+
+  // Warm the dynamic routes as soon as the navbar mounts. By the time the
+  // user clicks Book a Slot or the profile icon, the RSC payload is already
+  // in the router cache — clicks paint near-instantly.
+  useEffect(() => {
+    router.prefetch("/book");
+    router.prefetch("/account");
+    router.prefetch("/login");
+  }, [router]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -75,6 +86,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/book"
+            prefetch
             className="btn-primary rounded-full px-5 py-2.5 text-sm"
           >
             Book a Slot
@@ -136,6 +148,7 @@ export default function Navbar() {
             ) : null}
             <Link
               href="/book"
+              prefetch
               onClick={() => setOpen(false)}
               className="btn-primary mt-2 rounded-full px-5 py-3 text-center text-sm"
             >

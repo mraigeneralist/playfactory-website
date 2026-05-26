@@ -28,6 +28,7 @@ export default function HeroSection() {
             <div className="au4 mt-8 flex flex-wrap gap-3">
               <Link
                 href="/book"
+                prefetch
                 className="btn-primary inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base"
               >
                 Book a Slot

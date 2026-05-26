@@ -20,6 +20,7 @@ export default function CTASection() {
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/book"
+                  prefetch
                   className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 font-semibold text-primary-dark hover:bg-primary-soft transition-colors"
                 >
                   Book a Slot

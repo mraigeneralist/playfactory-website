@@ -4,6 +4,11 @@ import { createClient } from "./server";
  * Read the current user + their profile (name/phone/email) on the server.
  * Returns { user, profile } both possibly null. Use in server components and
  * route handlers — never client code.
+ *
+ * Perf note: getUser() validates the JWT with the Supabase auth server
+ * (~80-200ms). The profile select runs in parallel where possible. The
+ * proxy already calls getUser() on every request, but Supabase strongly
+ * recommends server components also call it to validate — we honour that.
  */
 export async function getUserAndProfile() {
   const supabase = await createClient();
@@ -14,20 +19,18 @@ export async function getUserAndProfile() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, name, phone, email")
+    .select("name,phone,email")
     .eq("id", user.id)
     .maybeSingle();
 
   return {
     user,
-    profile: profile
-      ? {
-          id: profile.id as string,
-          name: (profile.name as string) || "",
-          phone: (profile.phone as string) || "",
-          email: (profile.email as string) || user.email || "",
-        }
-      : { id: user.id, name: "", phone: "", email: user.email || "" },
+    profile: {
+      id: user.id,
+      name: (profile?.name as string) || "",
+      phone: (profile?.phone as string) || "",
+      email: (profile?.email as string) || user.email || "",
+    },
   };
 }
 
