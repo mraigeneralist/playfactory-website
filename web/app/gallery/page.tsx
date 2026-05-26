@@ -10,25 +10,48 @@ export const metadata = {
   description: `A look inside ${BUSINESS.name}.`,
 };
 
-interface Photo {
-  src: string;
-  label: string;
-  alt: string;
+interface Group {
+  title: string;
+  blurb: string;
+  photos: { src: string; alt: string }[];
 }
 
-const PHOTOS: Photo[] = [
-  { src: "/gallery/badminton-court1.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
-  { src: "/gallery/badminton-court2.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
-  { src: "/gallery/badminton-court3.jpg", label: "Badminton", alt: "Badminton court at PlayFactory" },
-  { src: "/gallery/tabletennis1.jpg", label: "Table Tennis", alt: "Table tennis at PlayFactory" },
-  { src: "/gallery/cricket1.jpg", label: "Cricket", alt: "Cricket turf at PlayFactory" },
-  { src: "/gallery/silambam1.jpg", label: "Silambam", alt: "Silambam class at PlayFactory" },
-  { src: "/gallery/drawing1.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
-  { src: "/gallery/drawing2.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
-  { src: "/gallery/drawing3.jpg", label: "Drawing", alt: "Drawing class at PlayFactory" },
-  { src: "/gallery/music1.jpg", label: "Music", alt: "Music class at PlayFactory" },
-  { src: "/gallery/music2.jpg", label: "Music", alt: "Music class at PlayFactory" },
-  { src: "/gallery/music3.jpg", label: "Music", alt: "Music class at PlayFactory" },
+const GROUPS: Group[] = [
+  {
+    title: "Sports & Courts",
+    blurb: "Where the games happen — badminton courts, cricket turf, table tennis tables.",
+    photos: [
+      { src: "/gallery/badminton-court1.jpg", alt: "Badminton court at PlayFactory" },
+      { src: "/gallery/badminton-court2.jpg", alt: "Badminton court at PlayFactory" },
+      { src: "/gallery/badminton-court3.jpg", alt: "Badminton court at PlayFactory" },
+      { src: "/gallery/cricket1.jpg", alt: "Cricket turf at PlayFactory" },
+      { src: "/gallery/tabletennis1.jpg", alt: "Table tennis at PlayFactory" },
+    ],
+  },
+  {
+    title: "Gym",
+    blurb: "Fully equipped strength and cardio floor for members and guests.",
+    photos: [
+      { src: "/gallery/gym1.jpg", alt: "Gym floor at PlayFactory" },
+      { src: "/gallery/gym2.jpg", alt: "Gym equipment at PlayFactory" },
+      { src: "/gallery/gym3.jpg", alt: "Gym floor at PlayFactory" },
+      { src: "/gallery/gym4.jpg", alt: "Gym equipment at PlayFactory" },
+      { src: "/gallery/gym5.jpg", alt: "Gym floor at PlayFactory" },
+    ],
+  },
+  {
+    title: "Coaching & Classes",
+    blurb: "Drawing, music, silambam — programs for kids and adults, all under one roof.",
+    photos: [
+      { src: "/gallery/drawing1.jpg", alt: "Drawing class at PlayFactory" },
+      { src: "/gallery/drawing2.jpg", alt: "Drawing class at PlayFactory" },
+      { src: "/gallery/drawing3.jpg", alt: "Drawing class at PlayFactory" },
+      { src: "/gallery/music1.jpg", alt: "Music class at PlayFactory" },
+      { src: "/gallery/music2.jpg", alt: "Music class at PlayFactory" },
+      { src: "/gallery/music3.jpg", alt: "Music class at PlayFactory" },
+      { src: "/gallery/silambam1.jpg", alt: "Silambam class at PlayFactory" },
+    ],
+  },
 ];
 
 export default function GalleryPage() {
@@ -50,30 +73,36 @@ export default function GalleryPage() {
           </div>
         </section>
 
-        <section className="py-12 md:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {PHOTOS.map((p, i) => (
-                <ScrollReveal key={p.src} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
-                  <figure className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-2 shadow-soft hover:shadow-rich transition-shadow">
-                    <Image
-                      src={p.src}
-                      alt={p.alt}
-                      fill
-                      sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
-                      <figcaption className="font-heading text-sm font-bold uppercase tracking-wider text-white">
-                        {p.label}
-                      </figcaption>
-                    </div>
-                  </figure>
-                </ScrollReveal>
-              ))}
+        {GROUPS.map((g) => (
+          <section key={g.title} className="py-12 md:py-16">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <ScrollReveal>
+                <div className="mb-8 max-w-2xl">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
+                    {g.title}
+                  </h2>
+                  <p className="mt-2 text-ink-soft">{g.blurb}</p>
+                </div>
+              </ScrollReveal>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {g.photos.map((p, i) => (
+                  <ScrollReveal key={p.src} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+                    <figure className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-2 shadow-soft hover:shadow-rich transition-shadow">
+                      <Image
+                        src={p.src}
+                        alt={p.alt}
+                        fill
+                        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </figure>
+                  </ScrollReveal>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ))}
       </main>
       <Footer />
       <WhatsAppFloat />

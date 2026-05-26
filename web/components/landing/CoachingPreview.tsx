@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { COACHING, formatINR } from "@/lib/constants";
+import { COACHING, formatINR, PUBLIC_WHATSAPP, BUSINESS } from "@/lib/constants";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-
-const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
 
 const CATEGORY_ICONS: Record<string, string> = {
   Badminton: "🏸",
@@ -13,8 +11,12 @@ const CATEGORY_ICONS: Record<string, string> = {
   Cricket: "🏏",
 };
 
+const enquireUrl = (category: string) =>
+  `https://wa.me/${PUBLIC_WHATSAPP}?text=${encodeURIComponent(
+    `Hi ${BUSINESS.name}, I'd like to enquire about ${category} coaching.`
+  )}`;
+
 export default function CoachingPreview() {
-  // One representative per category
   const categories = Array.from(new Set(COACHING.map((c) => c.category)));
 
   return (
@@ -38,36 +40,43 @@ export default function CoachingPreview() {
           {categories.map((cat, i) => {
             const sample = COACHING.find((c) => c.category === cat)!;
             const count = COACHING.filter((c) => c.category === cat).length;
+            const minPrice = Math.min(
+              ...COACHING.filter((c) => c.category === cat).map((c) => c.priceINR)
+            );
             return (
               <ScrollReveal key={cat} delay={((i % 3) + 1) as 1 | 2 | 3}>
-                <div className="h-full rounded-2xl border border-border bg-white p-6 shadow-soft hover:border-primary/30 transition-colors">
-                  <div className="text-3xl mb-3">{CATEGORY_ICONS[cat]}</div>
-                  <h3 className="font-heading text-xl font-bold text-ink mb-1">{cat}</h3>
-                  <p className="text-sm text-ink-soft mb-4">
-                    {count} {count === 1 ? "program" : "programs"} · from{" "}
-                    <span className="font-semibold text-primary-dark">
-                      {formatINR(Math.min(...COACHING.filter((c) => c.category === cat).map((c) => c.priceINR)))}
-                    </span>{" "}
-                    {sample.cadence}
-                  </p>
-                  <Link
-                    href={`/coaching#${slugify(cat)}`}
-                    className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark"
-                  >
-                    Know more
+                <a
+                  href={enquireUrl(cat)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-soft transition-all hover:-translate-y-1 hover:shadow-rich hover:border-primary/30"
+                >
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="text-3xl mb-3">{CATEGORY_ICONS[cat]}</div>
+                    <h3 className="font-heading text-xl font-bold text-ink mb-1">{cat}</h3>
+                    <p className="text-sm text-ink-soft">
+                      {count} {count === 1 ? "program" : "programs"} · from{" "}
+                      <span className="font-semibold text-primary-dark">
+                        {formatINR(minPrice)}
+                      </span>{" "}
+                      {sample.cadence}
+                    </p>
+                  </div>
+                  <div className="btn-primary flex items-center justify-center gap-2 rounded-none px-6 py-4 text-sm font-semibold">
+                    Enquire on WhatsApp
                     <svg
-                      width="14"
-                      height="14"
+                      width="16"
+                      height="16"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.5"
-                      className="transition-transform group-hover:translate-x-0.5"
+                      className="transition-transform group-hover:translate-x-1"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
                     </svg>
-                  </Link>
-                </div>
+                  </div>
+                </a>
               </ScrollReveal>
             );
           })}
