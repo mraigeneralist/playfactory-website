@@ -35,7 +35,14 @@ export default function SignupForm({ next }: { next: string }) {
 
     if (error) {
       setLoading(false);
-      setError(error.message);
+      // Common Supabase error: surface a friendlier message + sign-in offer
+      // for already-registered emails.
+      const lower = error.message.toLowerCase();
+      if (lower.includes("already registered") || lower.includes("user already")) {
+        setError("ALREADY_REGISTERED");
+      } else {
+        setError(error.message);
+      }
       return;
     }
 
@@ -48,24 +55,13 @@ export default function SignupForm({ next }: { next: string }) {
       return;
     }
 
-    // Upsert profile so name + phone are stored even if the DB trigger races.
-    if (data.user) {
-      try {
-        await supabase.from("profiles").upsert(
-          {
-            id: data.user.id,
-            email,
-            name: name.trim(),
-            phone,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "id" }
-        );
-      } catch {
-        // Trigger probably already populated it; safe to ignore.
-      }
-    }
+    // No client-side profile upsert. The DB trigger on auth.users (migration
+    // 0002) reads name + phone from raw_user_meta_data (which we set via
+    // options.data above) and creates a complete profile row. A client-side
+    // upsert here used to hang occasionally and freeze the button in
+    // "Creating…" — worth dropping for reliability.
 
+    // Hard-navigate so the server sees the freshly-written session cookie.
     window.location.assign(next);
   }
 
@@ -137,11 +133,21 @@ export default function SignupForm({ next }: { next: string }) {
           autoComplete="new-password"
         />
       </div>
-      {error && (
+      {error === "ALREADY_REGISTERED" ? (
+        <div className="rounded-xl border border-primary/30 bg-primary-soft p-3 text-sm text-primary-deep">
+          <strong>This email already has an account.</strong>{" "}
+          <a
+            href={`/login?next=${encodeURIComponent(next)}`}
+            className="font-semibold underline underline-offset-4 hover:text-primary"
+          >
+            Sign in instead →
+          </a>
+        </div>
+      ) : error ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
           {error}
         </div>
-      )}
+      ) : null}
       <button
         type="submit"
         disabled={!canSubmit || loading}
