@@ -59,23 +59,23 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="au3 relative">
+          <div className="au3 relative px-6 sm:px-8 md:px-0 pt-6 md:pt-0 pb-10 md:pb-0">
             <div className="relative aspect-square max-w-md mx-auto">
-              <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-primary via-primary-dark to-primary-deep shadow-rich" />
-              <div className="absolute inset-3 rounded-[2.2rem] bg-white overflow-hidden flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="text-8xl mb-4">🏸</div>
-                  <div className="font-heading text-2xl font-bold text-primary-deep">Game On.</div>
+              <div className="absolute inset-0 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-primary via-primary-dark to-primary-deep shadow-rich" />
+              <div className="absolute inset-3 rounded-[1.7rem] sm:rounded-[2.2rem] bg-white overflow-hidden flex items-center justify-center">
+                <div className="text-center p-6 sm:p-8">
+                  <div className="text-7xl sm:text-8xl mb-3 sm:mb-4">🏸</div>
+                  <div className="font-heading text-xl sm:text-2xl font-bold text-primary-deep">Game On.</div>
                   <div className="mt-2 text-sm text-ink-soft">Courts available every hour</div>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -left-6 rounded-2xl bg-white shadow-rich px-5 py-4 border border-border">
-                <div className="text-xs uppercase tracking-wider text-muted">Today</div>
-                <div className="font-heading text-2xl font-bold text-primary-dark">12 slots free</div>
+              <div className="absolute -bottom-5 -left-3 sm:-bottom-6 sm:-left-6 rounded-2xl bg-white shadow-rich px-4 py-3 sm:px-5 sm:py-4 border border-border">
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted">Today</div>
+                <div className="font-heading text-lg sm:text-2xl font-bold text-primary-dark">12 slots free</div>
               </div>
-              <div className="absolute -top-6 -right-6 rounded-2xl bg-primary text-white shadow-rich px-5 py-4">
-                <div className="text-xs uppercase tracking-wider opacity-80">Coaching</div>
-                <div className="font-heading text-xl font-bold">8 programs</div>
+              <div className="absolute -top-5 -right-3 sm:-top-6 sm:-right-6 rounded-2xl bg-primary text-white shadow-rich px-4 py-3 sm:px-5 sm:py-4">
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider opacity-80">Coaching</div>
+                <div className="font-heading text-base sm:text-xl font-bold">8 programs</div>
               </div>
             </div>
           </div>
