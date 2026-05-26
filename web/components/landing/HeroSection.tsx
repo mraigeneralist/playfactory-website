@@ -1,23 +1,18 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { BUSINESS, SPORTS, formatINR } from "@/lib/constants";
+import { BUSINESS } from "@/lib/constants";
 
 export default function HeroSection() {
-  const [picked, setPicked] = useState<string>(SPORTS[0].id);
-
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-surface via-white to-surface-2">
       <div className="dot-tex absolute inset-0 opacity-60" />
 
-      {/* Soft color blob */}
+      {/* Soft color blobs */}
       <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-primary-bright/10 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-12 pb-16 md:pt-20 md:pb-24">
-        <div className="grid items-center gap-10 md:gap-12 md:grid-cols-12">
-          <div className="md:col-span-6 lg:col-span-7">
+        <div className="grid items-center gap-10 md:gap-12 md:grid-cols-2">
+          <div>
             <div className="au1 mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-dark">
               <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
               Now open — Book online
@@ -30,10 +25,39 @@ export default function HeroSection() {
             </h1>
 
             <p className="au3 mt-5 max-w-xl text-base sm:text-lg text-ink-soft">
-              Book {BUSINESS.name}  courts and turfs in seconds — pick a sport, pick a slot, show up &amp; play.
+              Book {BUSINESS.name} courts and turfs in seconds — pick a sport, pick a slot, show up &amp; play.
             </p>
 
-            <div className="au4 hidden md:flex flex-wrap gap-x-5 gap-y-2 mt-7 text-sm text-ink-soft">
+            <div className="au4 mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/book"
+                className="btn-primary inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base"
+              >
+                Book a Slot
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14m0 0l-6-6m6 6l-6 6"
+                  />
+                </svg>
+              </Link>
+              <Link
+                href="/coaching"
+                className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-white px-7 py-3.5 text-base font-semibold text-primary-dark hover:bg-primary-soft transition-colors"
+              >
+                View Coaching
+              </Link>
+            </div>
+
+            <div className="au4 mt-10 grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2 text-sm text-ink-soft">
               <TrustItem>Instant confirmation</TrustItem>
               <TrustItem>Pay on arrival</TrustItem>
               <TrustItem>Open 6 AM – 11 PM</TrustItem>
@@ -41,94 +65,25 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Quick-book widget */}
-          <div className="au3 md:col-span-6 lg:col-span-5">
-            <div className="relative">
-              <div className="absolute -inset-3 rounded-[2.5rem] bg-gradient-to-br from-primary/25 via-primary-bright/15 to-transparent blur-2xl opacity-70" />
-
-              <div className="relative rounded-3xl bg-white shadow-rich border border-border overflow-hidden">
-                <div className="bg-gradient-to-br from-primary via-primary-dark to-primary-deep px-6 py-5 text-white">
-                  <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-white/70">
-                    Start booking
-                  </div>
-                  <div className="font-heading text-xl sm:text-2xl font-bold mt-1">
-                    What&apos;s your game?
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-6">
-                  <div className="relative -mx-5 sm:-mx-6">
-                    <div className="hero-pick-scroll flex gap-2.5 overflow-x-auto px-5 sm:px-6 pb-2 snap-x snap-mandatory">
-                      {SPORTS.map((s) => {
-                        const active = picked === s.id;
-                        return (
-                          <button
-                            key={s.id}
-                            onClick={() => setPicked(s.id)}
-                            className={`group flex w-[7.25rem] sm:w-32 shrink-0 snap-start flex-col items-center gap-1.5 rounded-2xl border p-3 sm:p-4 transition-all ${
-                              active
-                                ? "border-primary bg-primary-soft ring-2 ring-primary/20 -translate-y-0.5"
-                                : "border-border bg-white hover:border-primary/40 hover:-translate-y-0.5"
-                            }`}
-                          >
-                            <span className="text-3xl sm:text-4xl">{s.icon}</span>
-                            <span
-                              className={`text-xs sm:text-sm font-bold text-center leading-tight ${
-                                active ? "text-primary-dark" : "text-ink"
-                              }`}
-                            >
-                              {s.shortName}
-                            </span>
-                            <span className="text-[10px] sm:text-[11px] text-muted">
-                              from {formatINR(s.priceINR)}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {/* fade hint on right edge */}
-                    <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-white to-transparent" />
-                  </div>
-
-                  <Link
-                    href={`/book?sport=${picked}`}
-                    className="btn-primary mt-5 flex items-center justify-center gap-2 rounded-2xl py-3.5 sm:py-4 text-sm sm:text-base font-semibold"
-                  >
-                    Find me a slot
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 12h14m0 0l-6-6m6 6l-6 6"
-                      />
-                    </svg>
-                  </Link>
-
-                  <div className="mt-4 flex items-center justify-between text-[11px] sm:text-xs text-muted">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary-bright animate-pulse" />
-                      Live availability
-                    </span>
-                    <span>Pay on arrival</span>
-                  </div>
+          <div className="au3 relative px-6 sm:px-8 md:px-0 pt-6 md:pt-0 pb-10 md:pb-0">
+            <div className="relative aspect-square max-w-md mx-auto">
+              <div className="absolute inset-0 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-primary via-primary-dark to-primary-deep shadow-rich" />
+              <div className="absolute inset-3 rounded-[1.7rem] sm:rounded-[2.2rem] bg-white overflow-hidden flex items-center justify-center">
+                <div className="text-center p-6 sm:p-8">
+                  <div className="text-7xl sm:text-8xl mb-3 sm:mb-4">🏸</div>
+                  <div className="font-heading text-xl sm:text-2xl font-bold text-primary-deep">Game On.</div>
+                  <div className="mt-2 text-sm text-ink-soft">Courts available every hour</div>
                 </div>
               </div>
+              <div className="absolute -bottom-5 -left-3 sm:-bottom-6 sm:-left-6 rounded-2xl bg-white shadow-rich px-4 py-3 sm:px-5 sm:py-4 border border-border">
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted">Today</div>
+                <div className="font-heading text-lg sm:text-2xl font-bold text-primary-dark">12 slots free</div>
+              </div>
+              <div className="absolute -top-5 -right-3 sm:-top-6 sm:-right-6 rounded-2xl bg-primary text-white shadow-rich px-4 py-3 sm:px-5 sm:py-4">
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider opacity-80">Coaching</div>
+                <div className="font-heading text-base sm:text-xl font-bold">8 programs</div>
+              </div>
             </div>
-          </div>
-
-          {/* Mobile-only trust strip below widget */}
-          <div className="au4 md:hidden grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm text-ink-soft">
-            <TrustItem>Instant confirmation</TrustItem>
-            <TrustItem>Pay on arrival</TrustItem>
-            <TrustItem>Open 6 AM – 11 PM</TrustItem>
-            <TrustItem>Free parking</TrustItem>
           </div>
         </div>
       </div>

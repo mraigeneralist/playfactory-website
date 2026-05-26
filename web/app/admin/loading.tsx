@@ -5,7 +5,7 @@ export default function AdminLoading() {
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
-          <Logo className="text-lg sm:text-xl" />
+          <Logo className="text-xl sm:text-2xl" />
           <div className="h-8 w-20 rounded-full bg-border/60 animate-pulse" />
         </div>
       </div>

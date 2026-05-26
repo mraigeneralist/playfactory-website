@@ -124,7 +124,7 @@ export default function AdminDashboard() {
       <div className="bg-white border-b border-border sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link href="/admin" className="inline-flex flex-col items-start gap-0.5">
-            <Logo className="text-lg sm:text-xl" />
+            <Logo className="text-xl sm:text-2xl" />
             <span className="text-[10px] uppercase tracking-wider text-muted leading-tight">Owner dashboard</span>
           </Link>
           <div className="flex items-center gap-2">

@@ -9,7 +9,7 @@ export default function AccountLoading() {
     <div className="min-h-screen bg-surface">
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <Logo className="text-xl sm:text-2xl" />
+          <Logo className="text-2xl sm:text-3xl" />
           <div className="h-9 w-28 rounded-full bg-border/60 animate-pulse" />
         </div>
       </div>

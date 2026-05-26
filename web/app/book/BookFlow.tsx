@@ -167,7 +167,7 @@ export default function BookFlow({ initialProfile, preselectSportId }: Props) {
       <div className="bg-white border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <Link href="/" className="inline-flex">
-            <Logo className="text-xl sm:text-2xl" />
+            <Logo className="text-2xl sm:text-3xl" />
           </Link>
           {canBack ? (
             <button

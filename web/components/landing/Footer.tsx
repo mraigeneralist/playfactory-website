@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="mb-4">
-            <Logo className="text-2xl sm:text-3xl" variant="light" />
+            <Logo className="text-3xl sm:text-4xl" variant="light" />
           </div>
           <p className="text-white/70 max-w-md text-sm leading-relaxed">
             {BUSINESS.tagline}. Book courts and join coaching programs at
