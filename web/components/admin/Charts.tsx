@@ -2,11 +2,8 @@
 
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
 } from "recharts";
 import { formatINR } from "@/lib/constants";
-
-const GREENS = ["#16a34a", "#22c55e", "#4ade80", "#86efac", "#bbf7d0", "#15803d"];
 
 interface Pair { name: string; value: number }
 
@@ -37,40 +34,60 @@ export function RevenueByDayChart({ data }: { data: Pair[] }) {
   );
 }
 
+// Tiny helper: strip the "— 1 Hour" suffix our sport names carry so the chart
+// row stays scannable. Falls back to the full name if there's nothing to trim.
+function shortenSport(name: string): string {
+  return name.split("—")[0].trim() || name;
+}
+
 export function BookingsBySportChart({ data }: { data: Pair[] }) {
-  const total = data.reduce((a, b) => a + b.value, 0);
+  const sorted = [...data].sort((a, b) => b.value - a.value);
+  const total = sorted.reduce((a, b) => a + b.value, 0);
+  const max = sorted[0]?.value || 1;
+
   return (
     <div className="rounded-2xl border border-border bg-white p-5 shadow-soft">
-      <div className="text-[11px] uppercase tracking-wider font-semibold text-muted mb-1">
-        Bookings by sport
+      <div className="flex items-baseline justify-between mb-4">
+        <div>
+          <div className="text-[11px] uppercase tracking-wider font-semibold text-muted">
+            Bookings by sport
+          </div>
+          <div className="font-heading text-lg font-bold text-ink mt-0.5">
+            {total} <span className="text-sm font-medium text-muted">total</span>
+          </div>
+        </div>
       </div>
-      <div className="font-heading text-lg font-bold text-ink mb-4">{total} total</div>
-      <div className="h-56">
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              innerRadius={45}
-              outerRadius={75}
-              paddingAngle={2}
-            >
-              {data.map((_, i) => (
-                <Cell key={i} fill={GREENS[i % GREENS.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{ borderRadius: 10, border: "1px solid #e3ede7", fontSize: 13 }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              iconType="circle"
-              wrapperStyle={{ fontSize: 12 }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+
+      {sorted.length === 0 ? (
+        <div className="py-10 text-center text-sm text-muted">No bookings yet.</div>
+      ) : (
+        <ul className="space-y-3">
+          {sorted.map((row) => {
+            const widthPct = (row.value / max) * 100;
+            const sharePct = total > 0 ? Math.round((row.value / total) * 100) : 0;
+            return (
+              <li key={row.name} className="group">
+                <div className="flex items-baseline justify-between text-sm mb-1.5">
+                  <span className="font-medium text-ink truncate pr-3">
+                    {shortenSport(row.name)}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-muted text-xs">
+                    <span className="font-semibold text-ink">{row.value}</span>
+                    <span className="mx-1">·</span>
+                    {sharePct}%
+                  </span>
+                </div>
+                <div className="h-2.5 rounded-full bg-surface overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary-dark transition-[width] duration-500"
+                    style={{ width: `${widthPct}%` }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
